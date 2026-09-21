@@ -1,7 +1,7 @@
-/tmp/
-.gem_rbs_collection/
 .bundle/
+.gem_rbs_collection/
+/tmp/
 
 /bin/*
-!/bin/setup
 !/bin/console
+!/bin/setup
