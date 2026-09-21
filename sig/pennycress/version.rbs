@@ -1,0 +1,3 @@
+module Pennycress
+  VERSION: String
+end
