@@ -1,0 +1,4 @@
+module Pennycress
+  class Value
+  end
+end
