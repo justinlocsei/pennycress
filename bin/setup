@@ -3,4 +3,4 @@
 set -euo pipefail
 
 bundle install
-bundle binstubs steep rspec-core rubocop
+bundle binstubs steep rspec-core rubocop yard
