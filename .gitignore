@@ -1,5 +1,7 @@
 .bundle/
 .gem_rbs_collection/
+.yardoc/
+/doc/
 /tmp/
 
 /bin/*
