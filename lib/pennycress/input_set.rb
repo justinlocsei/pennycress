@@ -22,7 +22,7 @@ module Pennycress
 
     # Sets the IDs of the input models
     #
-    # @param ids [Array<Symbol>] model IDs (e.g., :uploaded_file, :user)
+    # @param ids [Array<Symbol>] model IDs (e.g., `:uploaded_file, :user`)
     # @return [void]
     def model_ids=(ids)
       @model_ids = ids.to_set
