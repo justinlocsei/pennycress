@@ -4,12 +4,17 @@ AllCops:
   SuggestExtensions: false
   Include:
     - lib/**/*.rb
+    - spec/**/*.rb
 
 Layout/AccessModifierIndentation:
   Enabled: false
 
 Layout/LineLength:
   Max: 120
+
+Layout/SpaceInsideHashLiteralBraces:
+  Enabled: true
+  EnforcedStyle: space
 
 Lint/RedundantRequireStatement:
   Enabled: false
