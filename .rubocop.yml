@@ -17,9 +17,6 @@ Lint/RedundantRequireStatement:
 Metrics:
   Enabled: false
 
-Style/Documentation:
-  Enabled: false
-
 Style/EmptyLiteral:
   Enabled: false
 
