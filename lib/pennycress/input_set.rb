@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "set"
-
 require_relative "errors"
 require_relative "models"
 
@@ -9,26 +7,19 @@ module Pennycress
   # An input set is a container for a value's inputs.  It tracks both models
   # and optional named inputs, if the value is derived from Ruby primitives.
   class InputSet
+    # @return [Array<Symbol>] the IDs of the models from which a value is derived
+    attr_reader :model_ids
+
     # @return [Hash{Symbol => Class}] a mapping of source IDs to Ruby value classes
-    attr_accessor :named
+    attr_reader :named
 
     # Creates a container for a value's inputs
-    def initialize
-      @model_ids = Set.new
-      @named = {}
-    end
-
-    # @return [Array<Symbol>] the IDs of the models from which a value is derived
-    def model_ids
-      @model_ids.to_a.sort
-    end
-
-    # Sets the IDs of the input models
     #
-    # @param ids [Array<Symbol>] model IDs (e.g., `:uploaded_file, :user`)
-    # @return [void]
-    def model_ids=(ids)
-      @model_ids = ids.to_set
+    # @param model_ids [Array<Symbol>] model IDs (e.g., `:uploaded_file, :user`)
+    # @param named [Hash{Symbol => Class}] named inputs (e.g., `{ id: Integer }`)
+    def initialize(model_ids: [], named: {})
+      @model_ids = model_ids.uniq.sort
+      @named = named
     end
 
     # Validates inputs against the current set's schema
@@ -62,7 +53,7 @@ module Pennycress
 
   private
 
-    # @return [Hash{Symbol => Class}] a mapping ofsource IDs to Ruby value classes
+    # @return [Hash{Symbol => Class}] a mapping of source IDs to Ruby value classes
     def schema
       @schema ||= model_ids
         .to_h { |id| [id, Pennycress::Models.resolve(id)] }
