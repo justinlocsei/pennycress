@@ -12,6 +12,9 @@ Layout/AccessModifierIndentation:
 Layout/LineLength:
   Max: 120
 
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
 Layout/SpaceInsideHashLiteralBraces:
   Enabled: true
   EnforcedStyle: space
