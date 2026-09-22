@@ -10,7 +10,7 @@ module Pennycress
     class << self
       # Defines the inputs from which the value is derived
       #
-      # @param models [Array<Symbol>] model IDs (e.g., `:uploaded_file, :user`)
+      # @param model_ids [Array<Symbol>] model IDs (e.g., `:uploaded_file, :user`)
       # @param other [Hash{Symbol => Class}] other input types (e.g., `name: String`)
       # @return [void]
       def derived_from(*model_ids, **other)
