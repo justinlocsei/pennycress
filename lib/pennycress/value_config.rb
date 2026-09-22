@@ -7,7 +7,7 @@ module Pennycress
   # inputs, invalidation conditions, and partitions.
   class ValueConfig
     # @return [InputSet] the inputs for the value
-    attr_reader :inputs
+    attr_accessor :inputs
 
     # Creates a value config
     def initialize

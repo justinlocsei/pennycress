@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative "input_set"
 require_relative "value_config"
 
 module Pennycress
@@ -14,10 +15,7 @@ module Pennycress
       # @param other [Hash{Symbol => Class}] other input types (e.g., `name: String`)
       # @return [void]
       def derived_from(*model_ids, **other)
-        inputs = config.inputs
-
-        inputs.model_ids = model_ids
-        inputs.named = other
+        config.inputs = InputSet.new(model_ids: model_ids, named: other)
       end
 
     private

@@ -13,14 +13,14 @@ RSpec.describe Pennycress::ValueConfig do
       expect(inputs.named).to be_empty
     end
 
-    it "reflects assigned inputs" do
-      inputs = config.inputs
+    it "can be configured" do
+      config.inputs = Pennycress::InputSet.new(
+        model_ids: %i[user post],
+        named: { id: Integer, name: String }
+      )
 
-      inputs.model_ids = %i[user post]
-      inputs.named = { id: Integer, name: String }
-
-      expect(inputs.model_ids).to eq(%i[post user])
-      expect(inputs.named).to eq({ id: Integer, name: String })
+      expect(config.inputs.model_ids).to eq(%i[post user])
+      expect(config.inputs.named).to eq({ id: Integer, name: String })
     end
   end
 end
