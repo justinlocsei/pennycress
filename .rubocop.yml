@@ -1,0 +1,30 @@
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.3
+  SuggestExtensions: false
+  Include:
+    - lib/**/*.rb
+
+Layout/AccessModifierIndentation:
+  Enabled: false
+
+Layout/LineLength:
+  Max: 120
+
+Lint/RedundantRequireStatement:
+  Enabled: false
+
+Metrics:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/EmptyLiteral:
+  Enabled: false
+
+Style/StringLiterals:
+  Enabled: false
+
+Style/TrivialAccessors:
+  Enabled: false
