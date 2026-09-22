@@ -22,7 +22,13 @@ Lint/RedundantRequireStatement:
 Metrics:
   Enabled: false
 
+Style/BlockDelimiters:
+  Enabled: false
+
 Style/EmptyLiteral:
+  Enabled: false
+
+Style/IfUnlessModifier:
   Enabled: false
 
 Style/StringLiterals:
