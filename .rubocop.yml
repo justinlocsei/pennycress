@@ -28,5 +28,8 @@ Style/EmptyLiteral:
 Style/StringLiterals:
   Enabled: false
 
+Style/SymbolProc:
+  Enabled: false
+
 Style/TrivialAccessors:
   Enabled: false
