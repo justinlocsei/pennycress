@@ -5,9 +5,9 @@ require_relative "schema"
 
 module Pennycress
   # An input set is a container for a value's inputs.  It tracks both models
-  # and optional named inputs, if the value is derived from Ruby primitives.
+  # and optional named inputs that allow a value to take arbitrary Ruby classes.
   class InputSet
-    # @return [Array<Symbol>] the IDs of the models from which a value is derived
+    # @return [Array<Symbol>] the IDs of the models used by the value
     attr_reader :model_ids
 
     # @return [Hash{Symbol => Class}] a mapping of source IDs to Ruby value classes
