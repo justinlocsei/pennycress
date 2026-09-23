@@ -21,7 +21,7 @@ module Pennycress
         config.inputs = InputSet.new(model_ids: model_ids, named: other)
       end
 
-      # Calculates an ouptut value for the given inputs
+      # Computes an output value for the given inputs
       #
       # @param inputs [Object]
       # @return [Object] the output value
@@ -32,28 +32,28 @@ module Pennycress
 
     private
 
-      # @return [ValueConfig] configuration for the value
+      # @return [ValueConfig]
       def config
         @config ||= ValueConfig.new
       end
     end
 
-    # Calculates an output value for valid inputs
+    # Computes an output value for valid inputs
     #
-    # @return [Object] the output value
+    # @return [Object]
     # @api value
-    def derive(*)
-      require_method(:derive)
+    def compute(*)
+      require_method(:compute)
     end
 
   private
 
-    # Calculates an output value for valid inputs
+    # Computes an output value for valid inputs
     #
     # @param inputs [Object]
     # @return [Object] the output value
     def fetch(**inputs)
-      derive(**inputs)
+      compute(**inputs)
     end
   end
 end

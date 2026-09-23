@@ -29,13 +29,13 @@ RSpec.describe Pennycress::Value do
       Class.new(Pennycress::Value) do
         inputs id: Integer
 
-        def derive(id:)
+        def compute(id:)
           id * 2
         end
       end
     end
 
-    it "raises when derive is not implemented" do
+    it "raises when compute is not implemented" do
       value_class = Class.new(Pennycress::Value) do
         inputs id: Integer
       end
@@ -50,7 +50,7 @@ RSpec.describe Pennycress::Value do
       )
     end
 
-    it "returns derive results for valid inputs" do
+    it "returns compute results for valid inputs" do
       expect(doubled_value.fetch(id: 3)).to eq(6)
       expect(doubled_value.fetch(id: 5)).to eq(10)
     end
