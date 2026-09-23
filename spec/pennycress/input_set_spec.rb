@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "active_record"
+require "pennycress/errors"
 require "pennycress/input_set"
 
 RSpec.describe Pennycress::InputSet do
@@ -51,51 +52,26 @@ RSpec.describe Pennycress::InputSet do
     end
 
     it "returns inputs that conform to the schema" do
-      args = {
+      value = {
         id: 1,
         name: "Alice",
         post: post_class.allocate,
         user: user_class.allocate
       }
 
-      expect(inputs.validate(args)).to eq(args)
+      expect(inputs.validate(value)).to eq(value)
     end
 
-    it "raises when a model ID or named input are missing" do
-      args = { name: "Alice", post: post_class.allocate }
-
-      expect { inputs.validate(args) }.to raise_error(
-        Pennycress::ValidationError,
-        "missing input: id\nmissing input: user"
-      )
-    end
-
-    it "raises when a model ID or named input have incorrect types" do
-      args = {
+    it "raises when inputs are incomplete or invalid" do
+      value = {
         id: "@id",
         name: "Alice",
-        post: post_class.allocate,
-        user: :invalid
+        post: post_class.allocate
       }
 
-      expect { inputs.validate(args) }.to raise_error(
+      expect { inputs.validate(value) }.to raise_error(
         Pennycress::ValidationError,
-        %(id must be an instance of Integer: "@id"\nuser must be an instance of User: :invalid)
-      )
-    end
-
-    it "raises when an extra key is present" do
-      args = {
-        extra: true,
-        id: 1,
-        name: "Alice",
-        post: post_class.allocate,
-        user: user_class.allocate
-      }
-
-      expect { inputs.validate(args) }.to raise_error(
-        Pennycress::ValidationError,
-        "unknown input: extra"
+        %(id is not an instance of Integer: "@id"\nmissing key: user)
       )
     end
   end

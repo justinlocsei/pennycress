@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require_relative "errors"
 require_relative "models"
+require_relative "schema"
 
 module Pennycress
   # An input set is a container for a value's inputs.  It tracks both models
@@ -25,30 +25,10 @@ module Pennycress
     # Validates inputs against the current set's schema
     #
     # @param inputs [Object] user-provided inputs
-    # @return [Object] inputs that conform to the schema
+    # @return [Hash] inputs that conform to the schema
     # @raise [ValidationError] if the inputs are invalid
     def validate(inputs)
-      unless inputs.is_a?(Hash)
-        raise ValidationError, "inputs must be a hash: #{inputs.inspect}"
-      end
-
-      errors = schema.keys.filter_map do |key|
-        "missing input: #{key}" unless inputs.key?(key)
-      end
-
-      errors += inputs.filter_map do |key, value|
-        if !schema.key?(key)
-          "unknown input: #{key}"
-        elsif !value.is_a?(schema[key])
-          "#{key} must be an instance of #{schema[key].name}: #{value.inspect}"
-        end
-      end
-
-      unless errors.empty?
-        raise ValidationError, errors.sort.join("\n")
-      end
-
-      inputs
+      Schema.validate_shape(schema, inputs)
     end
 
   private
