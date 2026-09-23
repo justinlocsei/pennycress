@@ -72,4 +72,81 @@ RSpec.describe Pennycress::Value do
       )
     end
   end
+
+  describe ".fetch_many" do
+    let(:doubled_value) do
+      Class.new(Pennycress::Value) do
+        inputs id: Integer
+        output Integer
+
+        def compute(id:)
+          id * 2
+        end
+      end
+    end
+
+    it "computes an output for each input" do
+      expect(doubled_value.fetch_many([{ id: 3 }, { id: 5 }])).to eq([6, 10])
+    end
+
+    it "raises when any inputs are invalid" do
+      expect { doubled_value.fetch_many([{ id: 3 }, { id: "5" }]) }.to raise_error(
+        Pennycress::ValidationError,
+        /5/
+      )
+    end
+
+    it "raises when any computed outputs are invalid" do
+      value = Class.new(Pennycress::Value) do
+        inputs id: Integer
+        output Integer
+
+        def compute(id:)
+          id == 1 ? id.to_s : id * 2
+        end
+      end
+
+      expect { value.fetch_many([{ id: 1 }, { id: 2 }]) }.to raise_error(
+        Pennycress::ValidationError,
+        'value is not an instance of Integer: "1"'
+      )
+    end
+
+    it "can use a custom compute_many implementation" do
+      value = Class.new(Pennycress::Value) do
+        inputs id: Integer
+        output Integer
+
+        def compute(id:)
+          id * 2
+        end
+
+        def compute_many(all_inputs)
+          all_inputs.map { |inputs| compute(**inputs) * 2 }
+        end
+      end
+
+      expect(value.fetch_many([{ id: 3 }, { id: 5 }])).to eq([12, 20])
+    end
+
+    it "raises when a custom compute_many returns an invalid output" do
+      value = Class.new(Pennycress::Value) do
+        inputs id: Integer
+        output Integer
+
+        def compute(id:)
+          id * 2
+        end
+
+        def compute_many(all_inputs)
+          all_inputs.map { |inputs| compute(**inputs).to_s }
+        end
+      end
+
+      expect { value.fetch_many([{ id: 3 }, { id: 5 }]) }.to raise_error(
+        Pennycress::ValidationError,
+        'value is not an instance of Integer: "6"'
+      )
+    end
+  end
 end
