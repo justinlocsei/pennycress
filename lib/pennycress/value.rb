@@ -40,7 +40,6 @@ module Pennycress
 
     # Calculates an output value for valid inputs
     #
-    # @param inputs [Object]
     # @return [Object] the output value
     # @api value
     def derive(*)
