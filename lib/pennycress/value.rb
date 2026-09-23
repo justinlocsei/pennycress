@@ -12,12 +12,12 @@ module Pennycress
     include Constraints
 
     class << self
-      # Defines the inputs from which the value is derived
+      # Defines the value's inputs
       #
       # @param model_ids [Array<Symbol>] model IDs (e.g., `:uploaded_file, :user`)
       # @param other [Hash{Symbol => Class}] other input types (e.g., `name: String`)
       # @return [void]
-      def derived_from(*model_ids, **other)
+      def inputs(*model_ids, **other)
         config.inputs = InputSet.new(model_ids: model_ids, named: other)
       end
 

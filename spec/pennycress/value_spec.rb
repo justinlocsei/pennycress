@@ -4,22 +4,22 @@ require "pennycress/errors"
 require "pennycress/value"
 
 RSpec.describe Pennycress::Value do
-  describe ".derived_from" do
+  describe ".inputs" do
     it "supports model IDs" do
       Class.new(Pennycress::Value) do
-        derived_from :uploaded_file, :user
+        inputs :uploaded_file, :user
       end
     end
 
     it "supports model IDs and named inputs" do
       Class.new(Pennycress::Value) do
-        derived_from :uploaded_file, :user, name: String
+        inputs :uploaded_file, :user, name: String
       end
     end
 
     it "supports only named inputs" do
       Class.new(Pennycress::Value) do
-        derived_from name: String
+        inputs name: String
       end
     end
   end
@@ -27,7 +27,7 @@ RSpec.describe Pennycress::Value do
   describe ".fetch" do
     let(:doubled_value) do
       Class.new(Pennycress::Value) do
-        derived_from id: Integer
+        inputs id: Integer
 
         def derive(id:)
           id * 2
@@ -37,7 +37,7 @@ RSpec.describe Pennycress::Value do
 
     it "raises when derive is not implemented" do
       value_class = Class.new(Pennycress::Value) do
-        derived_from id: Integer
+        inputs id: Integer
       end
 
       expect { value_class.fetch(id: 1) }.to raise_error(NotImplementedError)
