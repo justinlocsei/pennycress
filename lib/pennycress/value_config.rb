@@ -15,6 +15,10 @@ module Pennycress
     #   @param value [Output]
     attr_writer :output
 
+    # @!attribute [w] seeds
+    #   @param value [Proc]
+    attr_writer :seeds
+
     # @return [InputSet] the inputs for the value
     # @raise [ValidationError] if inputs are not present
     def inputs
@@ -30,6 +34,14 @@ module Pennycress
       raise ValidationError, "output is not defined" if @output.nil?
 
       @output
+    end
+
+    # @return [Proc] a block that defines the list of seeds
+    # @raise [ValidationError] if seeds are not defined
+    def seeds
+      raise ValidationError, "seeds are not defined" if @seeds.nil?
+
+      @seeds
     end
   end
 end
