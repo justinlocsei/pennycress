@@ -5,6 +5,24 @@ require "pennycress/errors"
 require "pennycress/input_set"
 
 RSpec.describe Pennycress::InputSet do
+  describe "#empty?" do
+    it "is true when there are no models or named inputs" do
+      expect(Pennycress::InputSet.new).to be_empty
+    end
+
+    it "is false when models are defined" do
+      inputs = Pennycress::InputSet.new(model_ids: [:user])
+
+      expect(inputs).not_to be_empty
+    end
+
+    it "is false when named inputs are defined" do
+      inputs = Pennycress::InputSet.new(named: { id: Integer })
+
+      expect(inputs).not_to be_empty
+    end
+  end
+
   describe "#model_ids" do
     it "is empty by default" do
       expect(Pennycress::InputSet.new.model_ids).to eq([])

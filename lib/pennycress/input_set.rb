@@ -22,6 +22,11 @@ module Pennycress
       @named = named
     end
 
+    # @return [Boolean] whether models and types are absent
+    def empty?
+      model_ids.empty? && named.empty?
+    end
+
     # Validates inputs against the current set's schema
     #
     # @param inputs [Object] user-provided inputs
