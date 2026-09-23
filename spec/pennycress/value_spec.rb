@@ -39,6 +39,7 @@ RSpec.describe Pennycress::Value do
     it "raises when compute is not implemented" do
       value_class = Class.new(Pennycress::Value) do
         inputs id: Integer
+        output Integer
       end
 
       expect { value_class.fetch(id: 1) }.to raise_error(NotImplementedError)
