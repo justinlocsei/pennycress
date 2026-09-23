@@ -28,6 +28,7 @@ RSpec.describe Pennycress::Value do
     let(:doubled_value) do
       Class.new(Pennycress::Value) do
         inputs id: Integer
+        output Integer
 
         def compute(id:)
           id * 2
@@ -53,6 +54,22 @@ RSpec.describe Pennycress::Value do
     it "returns compute results for valid inputs" do
       expect(doubled_value.fetch(id: 3)).to eq(6)
       expect(doubled_value.fetch(id: 5)).to eq(10)
+    end
+
+    it "raises when the computed output is invalid" do
+      invalid_output = Class.new(Pennycress::Value) do
+        inputs id: Integer
+        output Integer
+
+        def compute(id:)
+          id.to_s
+        end
+      end
+
+      expect { invalid_output.fetch(id: 1) }.to raise_error(
+        Pennycress::ValidationError,
+        'value is not an instance of Integer: "1"'
+      )
     end
   end
 end
