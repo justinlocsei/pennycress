@@ -90,6 +90,27 @@ RSpec.describe Pennycress::Value do
       expect(doubled_value.fetch_many([{ id: 3 }, { id: 5 }])).to eq([6, 10])
     end
 
+    it "accepts a lazy enumerable of inputs" do
+      computed = []
+
+      value = Class.new(Pennycress::Value) do
+        inputs id: Integer
+        output Integer
+
+        define_method(:compute) do |id:|
+          computed << id
+          id * 2
+        end
+      end
+
+      lazy_inputs = [{ id: 3 }, { id: 5 }].lazy
+      results = value.fetch_many(lazy_inputs)
+
+      expect(computed).to eq([])
+      expect(results.to_a).to eq([6, 10])
+      expect(computed).to eq([3, 5])
+    end
+
     it "raises when any inputs are invalid" do
       expect { doubled_value.fetch_many([{ id: 3 }, { id: "5" }]) }.to raise_error(
         Pennycress::ValidationError,

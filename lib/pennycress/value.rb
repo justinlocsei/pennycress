@@ -40,10 +40,10 @@ module Pennycress
         new.send(:fetch, **config.inputs.validate(inputs))
       end
 
-      # Computes output values for a list of inputs
+      # Computes output values for each input in an enumerable
       #
-      # @param all_inputs [Array<Object>]
-      # @return [Array<Object>] the output values
+      # @param all_inputs [Enumerable<Hash>] input hashes to compute
+      # @return [Enumerable<Object>] output values
       # @raise [ValidationError] if any inputs or outputs are invalid
       def fetch_many(all_inputs)
         validated = all_inputs.map do |inputs|
@@ -69,10 +69,10 @@ module Pennycress
       require_method(:compute)
     end
 
-    # Computes output values for a list of valid inputs
+    # Computes output values for each input in an enumerable
     #
-    # @param all_inputs [Array<Hash>] a list of valid inputs
-    # @return [Array<Object>]
+    # @param all_inputs [Enumerable<Hash>] valid input hashes to compute
+    # @return [Enumerable<Object>] output values
     # @api value
     def compute_many(all_inputs)
       all_inputs.map do |inputs|
@@ -90,10 +90,10 @@ module Pennycress
       output.validate(compute(**inputs))
     end
 
-    # Computes output values for a list of valid inputs
+    # Computes output values for each input in an enumerable
     #
-    # @param all_inputs [Array<Hash>] a list of valid inputs
-    # @return [Array<Object>] the output values
+    # @param all_inputs [Enumerable<Hash>] valid input hashes to compute
+    # @return [Enumerable<Object>] output values in the same shape as +all_inputs+
     def fetch_many(all_inputs)
       compute_many(all_inputs).map do |result|
         output.validate(result)
