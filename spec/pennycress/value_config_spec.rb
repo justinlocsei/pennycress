@@ -50,14 +50,11 @@ RSpec.describe Pennycress::ValueConfig do
   end
 
   describe "#seeds" do
-    it "raises when seeds are not defined" do
-      expect { config.seeds }.to raise_error(
-        Pennycress::ValidationError,
-        "seeds are not defined"
-      )
+    it "returns an empty array by default" do
+      expect(config.seeds.call).to eq([])
     end
 
-    it "returns the lazily evaluated seeds" do
+    it "returns configured seeds" do
       seeds = [1, 2, 3]
       config.seeds = proc { seeds }
 

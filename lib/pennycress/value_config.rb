@@ -37,11 +37,8 @@ module Pennycress
     end
 
     # @return [Proc] a block that defines the list of seeds
-    # @raise [ValidationError] if seeds are not defined
     def seeds
-      raise ValidationError, "seeds are not defined" if @seeds.nil?
-
-      @seeds
+      @seeds ||= proc { [] }
     end
   end
 end

@@ -57,7 +57,6 @@ module Pennycress
       #
       # @yieldreturn [Enumerable<Object>] a list of seeds to warm
       # @return [Enumerable<Object>] the defined seeds, when called without a block
-      # @raise [ValidationError] if seeds are not defined
       def seeds(&block)
         if block
           config.seeds = block

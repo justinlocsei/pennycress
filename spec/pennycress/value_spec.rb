@@ -233,13 +233,10 @@ RSpec.describe Pennycress::Value do
       expect(value.seeds).to eq([4, 5, 6])
     end
 
-    it "raises when seeds are not defined" do
+    it "returns an empty array by default" do
       value = Class.new(Pennycress::Value)
 
-      expect { value.seeds }.to raise_error(
-        Pennycress::ValidationError,
-        "seeds are not defined"
-      )
+      expect(value.seeds).to eq([])
     end
   end
 
