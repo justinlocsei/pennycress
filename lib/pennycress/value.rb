@@ -13,6 +13,11 @@ module Pennycress
     include Constraints
 
     class << self
+      # @return [ValueConfig] the value's configuration
+      def config
+        @config ||= ValueConfig.new
+      end
+
       # Computes an output value for the given input
       #
       # @param input [Hash] keyword arguments that should conform to the input schema
@@ -28,7 +33,7 @@ module Pennycress
       # @return [Array<Object>] output values
       # @raise [ValidationError] if any inputs or outputs are invalid
       def fetch_many(inputs)
-        new.send(:fetch_many, validate_inputs(inputs)).to_a
+        new.send(:fetch_many, inputs).to_a
       end
 
       # Defines the value's input schema
@@ -68,22 +73,6 @@ module Pennycress
         value = new
         seeds.each { |seed| value.warm_seed(seed) }
       end
-
-    private
-
-      # @return [ValueConfig]
-      def config
-        @config ||= ValueConfig.new
-      end
-
-      # Returns a list of validated inputs
-      #
-      # @param inputs [Enumerable<Hash>]
-      # @return [Enumerable<Hash>]
-      def validate_inputs(inputs)
-        input = config.input
-        inputs.lazy.map { |i| input.validate(i) }
-      end
     end
 
     # Computes an output value for a valid input
@@ -118,12 +107,7 @@ module Pennycress
     # @param seed [Object]
     # @return [void]
     def warm_seed(seed)
-      inputs = self.class.send(
-        :validate_inputs,
-        seed_to_inputs(seed)
-      )
-
-      fetch_many(inputs).each { nil }
+      fetch_many(seed_to_inputs(seed)).each { nil }
     end
 
   private
@@ -138,17 +122,26 @@ module Pennycress
 
     # Computes an output value for each input in an enumerable
     #
-    # @param inputs [Enumerable<Hash>] valid inputs
+    # @param inputs [Enumerable<Hash>] inputs to validate and compute
     # @return [Enumerable<Object>] output values
     def fetch_many(inputs)
-      compute_many(inputs).map do |result|
+      compute_many(validate_inputs(inputs)).map do |result|
         output.validate(result)
       end
     end
 
     # @return [Output] the value's output schema
     def output
-      @output ||= self.class.send(:config).output
+      @output ||= self.class.config.output
+    end
+
+    # Returns a lazy list of validated inputs
+    #
+    # @param inputs [Enumerable<Hash>]
+    # @return [Enumerator::Lazy]
+    def validate_inputs(inputs)
+      input = self.class.config.input
+      inputs.lazy.map { |i| input.validate(i) }
     end
   end
 end

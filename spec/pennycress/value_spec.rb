@@ -2,8 +2,20 @@
 
 require "pennycress/errors"
 require "pennycress/value"
+require "pennycress/value_config"
 
 RSpec.describe Pennycress::Value do
+  describe ".config" do
+    it "returns the value's configuration" do
+      value = Class.new(Pennycress::Value) do
+        input id: Integer
+        output Integer
+      end
+
+      expect(value.config).to be_a(Pennycress::ValueConfig)
+    end
+  end
+
   describe ".fetch" do
     let(:doubled_value) do
       Class.new(Pennycress::Value) do
