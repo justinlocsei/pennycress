@@ -61,4 +61,17 @@ RSpec.describe Pennycress::ValueConfig do
       expect(config.seeds.call).to eq(seeds)
     end
   end
+
+  describe "#watches" do
+    it "returns an empty array by default" do
+      expect(config.watches).to eq([])
+    end
+
+    it "returns configured watches" do
+      watched_model = Pennycress::WatchedModel.new(:discussion) { [] }
+      config.watches << watched_model
+
+      expect(config.watches).to eq([watched_model])
+    end
+  end
 end

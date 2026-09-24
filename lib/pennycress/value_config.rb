@@ -3,6 +3,7 @@
 require_relative "errors"
 require_relative "input"
 require_relative "output"
+require_relative "watched_model"
 
 module Pennycress
   # A value config holds data describing how a value behaves.
@@ -39,6 +40,11 @@ module Pennycress
     # @return [Proc] a block that defines the list of seeds
     def seeds
       @seeds ||= proc { [] }
+    end
+
+    # @return [Array<WatchedModel>] watches registered for the value
+    def watches
+      @watches ||= []
     end
   end
 end
