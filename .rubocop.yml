@@ -25,6 +25,9 @@ Lint/RedundantRequireStatement:
 Metrics:
   Enabled: false
 
+Naming/BlockForwarding:
+  Enabled: false
+
 Style/BlockDelimiters:
   Enabled: false
 
