@@ -13,6 +13,28 @@ module Pennycress
     include Constraints
 
     class << self
+      # Computes an output value for the given input
+      #
+      # @param input [Hash] keyword arguments that should conform to the input schema
+      # @return [Object] the output value
+      # @raise [ValidationError] if the input is invalid
+      def fetch(**input)
+        new.send(:fetch, **config.input.validate(input))
+      end
+
+      # Computes an output value for each input in an enumerable
+      #
+      # @param inputs [Enumerable<Hash>] a list of keyword arguments for inputs
+      # @return [Array<Object>] output values
+      # @raise [ValidationError] if any inputs or outputs are invalid
+      def fetch_many(inputs)
+        validated = inputs
+          .lazy
+          .map { |input| config.input.validate(input) }
+
+        new.send(:fetch_many, validated).to_a
+      end
+
       # Defines the value's input schema
       #
       # @param model_ids [Array<Symbol>] model IDs (e.g., `:uploaded_file, :user`)
@@ -42,28 +64,6 @@ module Pennycress
         else
           class_eval(&config.seeds)
         end
-      end
-
-      # Computes an output value for the given input
-      #
-      # @param input [Hash] keyword arguments that should conform to the input schema
-      # @return [Object] the output value
-      # @raise [ValidationError] if the input is invalid
-      def fetch(**input)
-        new.send(:fetch, **config.input.validate(input))
-      end
-
-      # Computes an output value for each input in an enumerable
-      #
-      # @param inputs [Enumerable<Hash>] a list of keyword arguments for inputs
-      # @return [Array<Object>] output values
-      # @raise [ValidationError] if any inputs or outputs are invalid
-      def fetch_many(inputs)
-        validated = inputs
-          .lazy
-          .map { |input| config.input.validate(input) }
-
-        new.send(:fetch_many, validated).to_a
       end
 
     private
