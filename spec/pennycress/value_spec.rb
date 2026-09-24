@@ -146,7 +146,41 @@ RSpec.describe Pennycress::Value do
       expect(doubled_value.fetch_many([{ id: 3 }, { id: 5 }])).to eq([6, 10])
     end
 
-    it "accepts a lazy enumerable of inputs" do
+    it "returns an array" do
+      expect(doubled_value.fetch_many([{ id: 3 }])).to be_a(Array)
+    end
+
+    it "pulls inputs on demand through the pipeline" do
+      computed = []
+      pulled = []
+
+      value = Class.new(Pennycress::Value) do
+        inputs id: Integer
+        output Integer
+
+        define_method(:compute) do |id:|
+          computed << id
+          id * 2
+        end
+      end
+
+      enum = Enumerator.new do |yielder|
+        pulled << :first
+        yielder << { id: 3 }
+        pulled << :second
+        yielder << { id: 5 }
+      end
+
+      expect(pulled).to eq([])
+      expect(computed).to eq([])
+
+      expect(value.fetch_many(enum)).to eq([6, 10])
+
+      expect(pulled).to eq(%i[first second])
+      expect(computed).to eq([3, 5])
+    end
+
+    it "stops at the first invalid input without processing the rest" do
       computed = []
 
       value = Class.new(Pennycress::Value) do
@@ -159,12 +193,18 @@ RSpec.describe Pennycress::Value do
         end
       end
 
-      lazy_inputs = [{ id: 3 }, { id: 5 }].lazy
-      results = value.fetch_many(lazy_inputs)
+      enum = Enumerator.new do |yielder|
+        yielder << { id: 3 }
+        yielder << { id: "5" }
+        yielder << { id: 7 }
+      end
 
-      expect(computed).to eq([])
-      expect(results.to_a).to eq([6, 10])
-      expect(computed).to eq([3, 5])
+      expect { value.fetch_many(enum) }.to raise_error(
+        Pennycress::ValidationError,
+        /5/
+      )
+
+      expect(computed).to eq([3])
     end
 
     it "raises when any inputs are invalid" do

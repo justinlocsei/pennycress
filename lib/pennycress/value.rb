@@ -56,14 +56,14 @@ module Pennycress
       # Computes output values for each input in an enumerable
       #
       # @param all_inputs [Enumerable<Hash>] input hashes to compute
-      # @return [Enumerable<Object>] output values
+      # @return [Array<Object>] output values
       # @raise [ValidationError] if any inputs or outputs are invalid
       def fetch_many(all_inputs)
-        validated = all_inputs.map do |inputs|
-          config.inputs.validate(inputs)
-        end
+        valid_inputs = all_inputs
+          .lazy
+          .map { |is| config.inputs.validate(is) }
 
-        new.send(:fetch_many, validated)
+        new.send(:fetch_many, valid_inputs).to_a
       end
 
     private
@@ -105,7 +105,7 @@ module Pennycress
 
     # Computes an output value for valid inputs
     #
-    # @param inputs [Object]
+    # @param inputs [Hash] a valid input
     # @return [Object] the output value
     def fetch(**inputs)
       output.validate(compute(**inputs))
@@ -113,8 +113,8 @@ module Pennycress
 
     # Computes output values for each input in an enumerable
     #
-    # @param all_inputs [Enumerable<Hash>] valid input hashes to compute
-    # @return [Enumerable<Object>] output values in the same shape as +all_inputs+
+    # @param all_inputs [Enumerable<Hash>] valid inputs
+    # @return [Enumerable<Object>] output values
     def fetch_many(all_inputs)
       compute_many(all_inputs).map do |result|
         output.validate(result)
