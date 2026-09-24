@@ -69,7 +69,7 @@ RSpec.describe Pennycress::Input do
       stub_const("Post", post_class)
     end
 
-    it "returns input that conforms to the contract" do
+    it "returns an input that conforms to the contract" do
       value = {
         id: 1,
         name: "Alice",
@@ -80,7 +80,7 @@ RSpec.describe Pennycress::Input do
       expect(input.validate(value)).to eq(value)
     end
 
-    it "raises when input is incomplete or invalid" do
+    it "raises when an input is incomplete or invalid" do
       value = {
         id: "@id",
         name: "Alice",

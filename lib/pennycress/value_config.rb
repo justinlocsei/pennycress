@@ -19,8 +19,8 @@ module Pennycress
     #   @param value [Proc]
     attr_writer :seeds
 
-    # @return [Input] the input contract for the value
-    # @raise [ValidationError] if input is not present
+    # @return [Input] the schema for the value's input
+    # @raise [ValidationError] if a schema is incomplete
     def input
       raise ValidationError, "input is not defined" if @input.nil?
       raise ValidationError, "input is empty" if @input.empty?
@@ -28,8 +28,8 @@ module Pennycress
       @input
     end
 
-    # @return [Output] the output for the value
-    # @raise [ValidationError] if output is not defined
+    # @return [Output] the schema for the value's output
+    # @raise [ValidationError] if a schema is not defined
     def output
       raise ValidationError, "output is not defined" if @output.nil?
 

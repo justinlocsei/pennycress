@@ -4,7 +4,7 @@ require_relative "models"
 require_relative "schema"
 
 module Pennycress
-  # An input describes a value's input contract.  It tracks both models and
+  # An input describes a value's input schema.  It tracks both models and
   # optional named fields that allow a value to take arbitrary Ruby classes.
   class Input
     # @return [Array<Symbol>] the IDs of the models used by the value
@@ -13,9 +13,9 @@ module Pennycress
     # @return [Hash{Symbol => Class}] a mapping of source IDs to Ruby value classes
     attr_reader :named
 
-    # Creates an input contract for a value
+    # Creates an input schema for a value
     #
-    # @param model_ids [Array<Symbol>] model IDs (e.g., `:uploaded_file, :user`)
+    # @param model_ids [Array<Symbol>] model IDs (e.g., `[:uploaded_file, :user]`)
     # @param named [Hash{Symbol => Class}] named fields (e.g., `{ id: Integer }`)
     def initialize(model_ids: [], named: {})
       @model_ids = model_ids.uniq.sort
@@ -27,10 +27,10 @@ module Pennycress
       model_ids.empty? && named.empty?
     end
 
-    # Validates an input against the contract
+    # Validates an input against the schema
     #
-    # @param input [Hash] user-provided input
-    # @return [Hash] input that conforms to the contract
+    # @param input [Object] user-provided input
+    # @return [Hash] an input that conforms to the schema
     # @raise [ValidationError] if the input is invalid
     def validate(input)
       Schema.validate_shape(schema, input)

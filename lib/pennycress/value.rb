@@ -13,7 +13,7 @@ module Pennycress
     include Constraints
 
     class << self
-      # Defines the value's input contract
+      # Defines the value's input schema
       #
       # @param model_ids [Array<Symbol>] model IDs (e.g., `:uploaded_file, :user`)
       # @param other [Hash{Symbol => Class}] other field types (e.g., `name: String`)
@@ -22,7 +22,7 @@ module Pennycress
         config.input = Input.new(model_ids: model_ids, named: other)
       end
 
-      # Defines the value's output
+      # Defines the value's output schema
       #
       # @param schema [Class, Hash{Symbol => Class}] a scalar type or shape hash
       # @return [void]
@@ -46,16 +46,16 @@ module Pennycress
 
       # Computes an output value for the given input
       #
-      # @param input [Hash] keyword arguments identifying one value instance
+      # @param input [Hash] keyword arguments that should conform to the input schema
       # @return [Object] the output value
       # @raise [ValidationError] if the input is invalid
       def fetch(**input)
         new.send(:fetch, **config.input.validate(input))
       end
 
-      # Computes output values for each input in an enumerable
+      # Computes an output value for each input in an enumerable
       #
-      # @param inputs [Enumerable<Hash>] inputs to compute
+      # @param inputs [Enumerable<Hash>] a list of keyword arguments for inputs
       # @return [Array<Object>] output values
       # @raise [ValidationError] if any inputs or outputs are invalid
       def fetch_many(inputs)
@@ -84,7 +84,7 @@ module Pennycress
 
     # Computes output values for each input in an enumerable
     #
-    # @param inputs [Enumerable<Hash>] valid inputs to compute
+    # @param inputs [Enumerable<Hash>] a list of valid inputs
     # @return [Enumerable<Object>] output values
     # @api value
     def compute_many(inputs)
@@ -111,7 +111,7 @@ module Pennycress
       output.validate(compute(**input))
     end
 
-    # Computes output values for each input in an enumerable
+    # Computes an output value for each input in an enumerable
     #
     # @param inputs [Enumerable<Hash>] valid inputs
     # @return [Enumerable<Object>] output values

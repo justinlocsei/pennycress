@@ -207,7 +207,7 @@ RSpec.describe Pennycress::Value do
       expect(computed).to eq([3])
     end
 
-    it "raises when any inputs are invalid" do
+    it "raises when an input is invalid" do
       expect { doubled_value.fetch_many([{ id: 3 }, { id: "5" }]) }.to raise_error(
         Pennycress::ValidationError,
         /5/
