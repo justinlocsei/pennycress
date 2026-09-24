@@ -4,6 +4,7 @@ require_relative "constraints"
 require_relative "input"
 require_relative "output"
 require_relative "value_config"
+require_relative "watched_model"
 
 module Pennycress
   # A value describes a computation performed for each distinct input.  After
@@ -64,6 +65,16 @@ module Pennycress
         else
           class_eval(&config.seeds)
         end
+      end
+
+      # Registers a watch on a model
+      #
+      # @param id [Symbol] the model ID to watch (e.g., `:discussion`)
+      # @yieldparam model [ActiveRecord::Base] the changed model instance
+      # @yieldreturn [Enumerable<Hash>] inputs to refresh
+      # @return [void]
+      def watch(id, &inputs)
+        config.watches << WatchedModel.new(id, &inputs)
       end
 
       # Warms the cache for each seed

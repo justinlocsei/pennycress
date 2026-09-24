@@ -252,6 +252,36 @@ RSpec.describe Pennycress::Value do
     end
   end
 
+  describe ".watch" do
+    it "registers a watch on the config" do
+      value = Class.new(Pennycress::Value) do
+        watch :discussion do |discussion|
+          [{ id: discussion }]
+        end
+      end
+
+      watches = value.config.watches
+
+      expect(watches.length).to eq(1)
+      expect(watches.first.id).to eq(:discussion)
+      expect(watches.first.inputs_for(1)).to eq([{ id: 1 }])
+    end
+
+    it "supports multiple watches" do
+      value = Class.new(Pennycress::Value) do
+        watch :discussion do |discussion|
+          [{ id: discussion }]
+        end
+
+        watch :comment do |comment|
+          [{ id: comment }]
+        end
+      end
+
+      expect(value.config.watches.map(&:id)).to eq(%i[discussion comment])
+    end
+  end
+
   describe ".warm" do
     it "does nothing when seeds are empty" do
       value = Class.new(Pennycress::Value) do
