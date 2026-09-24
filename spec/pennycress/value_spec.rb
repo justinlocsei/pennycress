@@ -4,22 +4,22 @@ require "pennycress/errors"
 require "pennycress/value"
 
 RSpec.describe Pennycress::Value do
-  describe ".inputs" do
+  describe ".input" do
     it "supports model IDs" do
       Class.new(Pennycress::Value) do
-        inputs :uploaded_file, :user
+        input :uploaded_file, :user
       end
     end
 
-    it "supports model IDs and named inputs" do
+    it "supports model IDs and named fields" do
       Class.new(Pennycress::Value) do
-        inputs :uploaded_file, :user, name: String
+        input :uploaded_file, :user, name: String
       end
     end
 
-    it "supports only named inputs" do
+    it "supports only named fields" do
       Class.new(Pennycress::Value) do
-        inputs name: String
+        input name: String
       end
     end
   end
@@ -27,7 +27,7 @@ RSpec.describe Pennycress::Value do
   describe ".fetch" do
     let(:doubled_value) do
       Class.new(Pennycress::Value) do
-        inputs id: Integer
+        input id: Integer
         output Integer
 
         def compute(id:)
@@ -38,28 +38,28 @@ RSpec.describe Pennycress::Value do
 
     it "raises when compute is not implemented" do
       value_class = Class.new(Pennycress::Value) do
-        inputs id: Integer
+        input id: Integer
         output Integer
       end
 
       expect { value_class.fetch(id: 1) }.to raise_error(NotImplementedError)
     end
 
-    it "raises when inputs are invalid" do
+    it "raises when input is invalid" do
       expect { doubled_value.fetch(id: "100") }.to raise_error(
         Pennycress::ValidationError,
         /100/
       )
     end
 
-    it "returns compute results for valid inputs" do
+    it "returns compute results for valid input" do
       expect(doubled_value.fetch(id: 3)).to eq(6)
       expect(doubled_value.fetch(id: 5)).to eq(10)
     end
 
     it "raises when the computed output is invalid" do
       invalid_output = Class.new(Pennycress::Value) do
-        inputs id: Integer
+        input id: Integer
         output Integer
 
         def compute(id:)
@@ -116,7 +116,7 @@ RSpec.describe Pennycress::Value do
 
     it "returns input hashes for a seed" do
       value = Class.new(Pennycress::Value) do
-        inputs id: Integer
+        input id: Integer
         output Integer
 
         seeds { [1, 2] }
@@ -133,7 +133,7 @@ RSpec.describe Pennycress::Value do
   describe ".fetch_many" do
     let(:doubled_value) do
       Class.new(Pennycress::Value) do
-        inputs id: Integer
+        input id: Integer
         output Integer
 
         def compute(id:)
@@ -155,7 +155,7 @@ RSpec.describe Pennycress::Value do
       pulled = []
 
       value = Class.new(Pennycress::Value) do
-        inputs id: Integer
+        input id: Integer
         output Integer
 
         define_method(:compute) do |id:|
@@ -184,7 +184,7 @@ RSpec.describe Pennycress::Value do
       computed = []
 
       value = Class.new(Pennycress::Value) do
-        inputs id: Integer
+        input id: Integer
         output Integer
 
         define_method(:compute) do |id:|
@@ -216,7 +216,7 @@ RSpec.describe Pennycress::Value do
 
     it "raises when any computed outputs are invalid" do
       value = Class.new(Pennycress::Value) do
-        inputs id: Integer
+        input id: Integer
         output Integer
 
         def compute(id:)
@@ -232,15 +232,15 @@ RSpec.describe Pennycress::Value do
 
     it "can use a custom compute_many implementation" do
       value = Class.new(Pennycress::Value) do
-        inputs id: Integer
+        input id: Integer
         output Integer
 
         def compute(id:)
           id * 2
         end
 
-        def compute_many(all_inputs)
-          all_inputs.map { |inputs| compute(**inputs) * 2 }
+        def compute_many(inputs)
+          inputs.map { |input| compute(**input) * 2 }
         end
       end
 
@@ -249,15 +249,15 @@ RSpec.describe Pennycress::Value do
 
     it "raises when a custom compute_many returns an invalid output" do
       value = Class.new(Pennycress::Value) do
-        inputs id: Integer
+        input id: Integer
         output Integer
 
         def compute(id:)
           id * 2
         end
 
-        def compute_many(all_inputs)
-          all_inputs.map { |inputs| compute(**inputs).to_s }
+        def compute_many(inputs)
+          inputs.map { |input| compute(**input).to_s }
         end
       end
 

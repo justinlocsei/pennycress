@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 require_relative "errors"
-require_relative "input_set"
+require_relative "input"
 require_relative "output"
 
 module Pennycress
   # A value config holds data describing how a value behaves.
   class ValueConfig
-    # @!attribute [w] inputs
-    #   @param value [InputSet]
-    attr_writer :inputs
+    # @!attribute [w] input
+    #   @param value [Input]
+    attr_writer :input
 
     # @!attribute [w] output
     #   @param value [Output]
@@ -19,13 +19,13 @@ module Pennycress
     #   @param value [Proc]
     attr_writer :seeds
 
-    # @return [InputSet] the inputs for the value
-    # @raise [ValidationError] if inputs are not present
-    def inputs
-      raise ValidationError, "inputs are not defined" if @inputs.nil?
-      raise ValidationError, "inputs are empty" if @inputs.empty?
+    # @return [Input] the input contract for the value
+    # @raise [ValidationError] if input is not present
+    def input
+      raise ValidationError, "input is not defined" if @input.nil?
+      raise ValidationError, "input is empty" if @input.empty?
 
-      @inputs
+      @input
     end
 
     # @return [Output] the output for the value

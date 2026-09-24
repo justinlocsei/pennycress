@@ -1,25 +1,25 @@
 # frozen_string_literal: true
 
 require_relative "constraints"
-require_relative "input_set"
+require_relative "input"
 require_relative "output"
 require_relative "value_config"
 
 module Pennycress
-  # A value describes a computation performed on a set of inputs.  After the
-  # initial value is computed, it is cached and reused until an invalidation
+  # A value describes a computation performed for each distinct input.  After
+  # the initial value is computed, it is cached and reused until an invalidation
   # condition is met.
   class Value
     include Constraints
 
     class << self
-      # Defines the value's inputs
+      # Defines the value's input contract
       #
       # @param model_ids [Array<Symbol>] model IDs (e.g., `:uploaded_file, :user`)
-      # @param other [Hash{Symbol => Class}] other input types (e.g., `name: String`)
+      # @param other [Hash{Symbol => Class}] other field types (e.g., `name: String`)
       # @return [void]
-      def inputs(*model_ids, **other)
-        config.inputs = InputSet.new(model_ids: model_ids, named: other)
+      def input(*model_ids, **other)
+        config.input = Input.new(model_ids: model_ids, named: other)
       end
 
       # Defines the value's output
@@ -44,26 +44,26 @@ module Pennycress
         end
       end
 
-      # Computes an output value for the given inputs
+      # Computes an output value for the given input
       #
-      # @param inputs [Object]
+      # @param input [Hash] keyword arguments identifying one value instance
       # @return [Object] the output value
-      # @raise [ValidationError] if the inputs are invalid
-      def fetch(**inputs)
-        new.send(:fetch, **config.inputs.validate(inputs))
+      # @raise [ValidationError] if the input is invalid
+      def fetch(**input)
+        new.send(:fetch, **config.input.validate(input))
       end
 
       # Computes output values for each input in an enumerable
       #
-      # @param all_inputs [Enumerable<Hash>] input hashes to compute
+      # @param inputs [Enumerable<Hash>] inputs to compute
       # @return [Array<Object>] output values
       # @raise [ValidationError] if any inputs or outputs are invalid
-      def fetch_many(all_inputs)
-        valid_inputs = all_inputs
+      def fetch_many(inputs)
+        validated = inputs
           .lazy
-          .map { |is| config.inputs.validate(is) }
+          .map { |input| config.input.validate(input) }
 
-        new.send(:fetch_many, valid_inputs).to_a
+        new.send(:fetch_many, validated).to_a
       end
 
     private
@@ -74,7 +74,7 @@ module Pennycress
       end
     end
 
-    # Computes an output value for valid inputs
+    # Computes an output value for a valid input
     #
     # @return [Object]
     # @api value
@@ -84,12 +84,12 @@ module Pennycress
 
     # Computes output values for each input in an enumerable
     #
-    # @param all_inputs [Enumerable<Hash>] valid input hashes to compute
+    # @param inputs [Enumerable<Hash>] valid inputs to compute
     # @return [Enumerable<Object>] output values
     # @api value
-    def compute_many(all_inputs)
-      all_inputs.map do |inputs|
-        compute(**inputs)
+    def compute_many(inputs)
+      inputs.map do |input|
+        compute(**input)
       end
     end
 
@@ -103,20 +103,20 @@ module Pennycress
 
   private
 
-    # Computes an output value for valid inputs
+    # Computes an output value for a valid input
     #
-    # @param inputs [Hash] a valid input
+    # @param input [Hash] a valid input
     # @return [Object] the output value
-    def fetch(**inputs)
-      output.validate(compute(**inputs))
+    def fetch(**input)
+      output.validate(compute(**input))
     end
 
     # Computes output values for each input in an enumerable
     #
-    # @param all_inputs [Enumerable<Hash>] valid inputs
+    # @param inputs [Enumerable<Hash>] valid inputs
     # @return [Enumerable<Object>] output values
-    def fetch_many(all_inputs)
-      compute_many(all_inputs).map do |result|
+    def fetch_many(inputs)
+      compute_many(inputs).map do |result|
         output.validate(result)
       end
     end

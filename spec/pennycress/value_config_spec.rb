@@ -6,31 +6,31 @@ require "pennycress/value_config"
 RSpec.describe Pennycress::ValueConfig do
   let(:config) { Pennycress::ValueConfig.new }
 
-  describe "#inputs" do
-    it "raises when inputs are not defined" do
-      expect { config.inputs }.to raise_error(
+  describe "#input" do
+    it "raises when input is not defined" do
+      expect { config.input }.to raise_error(
         Pennycress::ValidationError,
-        "inputs are not defined"
+        "input is not defined"
       )
     end
 
-    it "raises when inputs are empty" do
-      config.inputs = Pennycress::InputSet.new
+    it "raises when input is empty" do
+      config.input = Pennycress::Input.new
 
-      expect { config.inputs }.to raise_error(
+      expect { config.input }.to raise_error(
         Pennycress::ValidationError,
-        "inputs are empty"
+        "input is empty"
       )
     end
 
-    it "returns configured inputs" do
-      config.inputs = Pennycress::InputSet.new(
+    it "returns configured input" do
+      config.input = Pennycress::Input.new(
         model_ids: %i[user post],
         named: { id: Integer, name: String }
       )
 
-      expect(config.inputs.model_ids).to eq(%i[post user])
-      expect(config.inputs.named).to eq({ id: Integer, name: String })
+      expect(config.input.model_ids).to eq(%i[post user])
+      expect(config.input.named).to eq({ id: Integer, name: String })
     end
   end
 
