@@ -74,6 +74,62 @@ RSpec.describe Pennycress::Value do
     end
   end
 
+  describe ".seeds" do
+    it "defines and returns seeds" do
+      value = Class.new(Pennycress::Value) do
+        seeds { [1, 2, 3] }
+      end
+
+      expect(value.seeds).to eq([1, 2, 3])
+    end
+
+    it "evaluates the block in the class context" do
+      value = Class.new(Pennycress::Value) do
+        def self.seed_ids
+          [4, 5, 6]
+        end
+
+        seeds { seed_ids }
+      end
+
+      expect(value.seeds).to eq([4, 5, 6])
+    end
+
+    it "raises when seeds are not defined" do
+      value = Class.new(Pennycress::Value)
+
+      expect { value.seeds }.to raise_error(
+        Pennycress::ValidationError,
+        "seeds are not defined"
+      )
+    end
+  end
+
+  describe "#seed_to_inputs" do
+    it "raises when not implemented" do
+      value = Class.new(Pennycress::Value) do
+        seeds { [1] }
+      end
+
+      expect { value.new.seed_to_inputs(1) }.to raise_error(NotImplementedError)
+    end
+
+    it "returns input hashes for a seed" do
+      value = Class.new(Pennycress::Value) do
+        inputs id: Integer
+        output Integer
+
+        seeds { [1, 2] }
+
+        def seed_to_inputs(seed)
+          [{ id: seed }, { id: seed + 10 }]
+        end
+      end
+
+      expect(value.new.seed_to_inputs(1)).to eq([{ id: 1 }, { id: 11 }])
+    end
+  end
+
   describe ".fetch_many" do
     let(:doubled_value) do
       Class.new(Pennycress::Value) do

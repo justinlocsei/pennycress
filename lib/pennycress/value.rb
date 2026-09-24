@@ -31,6 +31,19 @@ module Pennycress
         config.output = Output.new(schema)
       end
 
+      # Defines or returns the value's seeds
+      #
+      # @yieldreturn [Enumerable<Object>] a list of seeds to warm
+      # @return [Enumerable<Object>] the defined seeds, when called without a block
+      # @raise [ValidationError] if seeds are not defined
+      def seeds(&block)
+        if block
+          config.seeds = block
+        else
+          class_eval(&config.seeds)
+        end
+      end
+
       # Computes an output value for the given inputs
       #
       # @param inputs [Object]
@@ -78,6 +91,14 @@ module Pennycress
       all_inputs.map do |inputs|
         compute(**inputs)
       end
+    end
+
+    # Converts a seed to a list of inputs
+    #
+    # @return [Enumerable<Hash>]
+    # @api value
+    def seed_to_inputs(*)
+      require_method(:seed_to_inputs)
     end
 
   private
