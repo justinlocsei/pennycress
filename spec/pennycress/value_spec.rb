@@ -240,6 +240,56 @@ RSpec.describe Pennycress::Value do
     end
   end
 
+  describe ".warm" do
+    it "does nothing when seeds are empty" do
+      value = Class.new(Pennycress::Value) do
+        input id: Integer
+        output Integer
+      end
+
+      expect { value.warm }.not_to raise_error
+    end
+
+    it "warms each seed" do
+      computed = []
+
+      value = Class.new(Pennycress::Value) do
+        input id: Integer
+        output Integer
+
+        seeds { [1, 2] }
+
+        define_method(:compute) do |id:|
+          computed << id
+          id * 2
+        end
+
+        def seed_to_inputs(seed)
+          [{ id: seed }, { id: seed + 10 }]
+        end
+      end
+
+      value.warm
+
+      expect(computed).to eq([1, 11, 2, 12])
+    end
+
+    it "raises when seed_to_inputs is not implemented" do
+      value = Class.new(Pennycress::Value) do
+        input id: Integer
+        output Integer
+
+        seeds { [1] }
+
+        def compute(id:)
+          id
+        end
+      end
+
+      expect { value.warm }.to raise_error(NotImplementedError)
+    end
+  end
+
   describe "#seed_to_inputs" do
     it "raises when not implemented" do
       value = Class.new(Pennycress::Value) do
@@ -262,6 +312,43 @@ RSpec.describe Pennycress::Value do
       end
 
       expect(value.new.seed_to_inputs(1)).to eq([{ id: 1 }, { id: 11 }])
+    end
+  end
+
+  describe "#warm_seed" do
+    it "fetches each input produced by seed_to_inputs" do
+      computed = []
+
+      value = Class.new(Pennycress::Value) do
+        input id: Integer
+        output Integer
+
+        define_method(:compute) do |id:|
+          computed << id
+          id * 2
+        end
+
+        def seed_to_inputs(seed)
+          [{ id: seed }, { id: seed + 10 }]
+        end
+      end
+
+      value.new.warm_seed(3)
+
+      expect(computed).to eq([3, 13])
+    end
+
+    it "raises when seed_to_inputs is not implemented" do
+      value = Class.new(Pennycress::Value) do
+        input id: Integer
+        output Integer
+
+        def compute(id:)
+          id
+        end
+      end
+
+      expect { value.new.warm_seed(1) }.to raise_error(NotImplementedError)
     end
   end
 end

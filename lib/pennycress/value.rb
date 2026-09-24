@@ -28,11 +28,7 @@ module Pennycress
       # @return [Array<Object>] output values
       # @raise [ValidationError] if any inputs or outputs are invalid
       def fetch_many(inputs)
-        validated = inputs
-          .lazy
-          .map { |input| config.input.validate(input) }
-
-        new.send(:fetch_many, validated).to_a
+        new.send(:fetch_many, validate_inputs(inputs)).to_a
       end
 
       # Defines the value's input schema
@@ -65,11 +61,28 @@ module Pennycress
         end
       end
 
+      # Warms the cache for each seed
+      #
+      # @return [void]
+      def warm
+        value = new
+        seeds.each { |seed| value.warm_seed(seed) }
+      end
+
     private
 
       # @return [ValueConfig]
       def config
         @config ||= ValueConfig.new
+      end
+
+      # Returns a list of validated inputs
+      #
+      # @param inputs [Enumerable<Hash>]
+      # @return [Enumerable<Hash>]
+      def validate_inputs(inputs)
+        input = config.input
+        inputs.lazy.map { |i| input.validate(i) }
       end
     end
 
@@ -98,6 +111,19 @@ module Pennycress
     # @api value
     def seed_to_inputs(*)
       require_method(:seed_to_inputs)
+    end
+
+    # Warms the cache for a seed
+    #
+    # @param seed [Object]
+    # @return [void]
+    def warm_seed(seed)
+      inputs = self.class.send(
+        :validate_inputs,
+        seed_to_inputs(seed)
+      )
+
+      fetch_many(inputs).each { nil }
     end
 
   private
