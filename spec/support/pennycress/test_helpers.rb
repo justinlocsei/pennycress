@@ -8,12 +8,12 @@ module Pennycress
   module TestHelpers
     # Runs a block with an in-memory cache configuration
     #
-    # @param namespace [String, nil] the global cache namespace
+    # @param namespace [String] the global cache namespace
     # @yield run examples against the temporary configuration
     # @return [Object] the block's return value
-    def with_memory_cache(namespace: nil, &block)
+    def with_memory_cache(namespace: "pennycress/test", &block)
       Configuration.override(
-        build_memory_cache_config(namespace: namespace),
+        build_memory_cache_config(namespace),
         &block
       )
     end
@@ -24,7 +24,7 @@ module Pennycress
     #
     # @param namespace [String] the global cache key prefix
     # @return [Configuration]
-    def build_memory_cache_config(namespace: "pennycress/test")
+    def build_memory_cache_config(namespace)
       Configuration.build do |config|
         config.cache = ActiveSupport::Cache::MemoryStore.new
         config.cache_namespace = namespace
