@@ -65,8 +65,24 @@ RSpec.describe Pennycress::Cache do
   describe "#write" do
     it "stores a value in the cache" do
       expect(store.read(ref.cache_key)).to be_nil
-      expect(cache.write(ref, "alfa")).to be(true)
+
+      cache.write(ref, "alfa")
+
       expect(store.read(ref.cache_key)).to eq("alfa")
+    end
+  end
+
+  describe "#write_multi" do
+    let(:other_ref) { Pennycress::OutputReference.new(input: { id: 2 }) }
+
+    it "stores multiple values in the cache" do
+      cache.write_multi(
+        ref => "alfa",
+        other_ref => "bravo"
+      )
+
+      expect(store.read(ref.cache_key)).to eq("alfa")
+      expect(store.read(other_ref.cache_key)).to eq("bravo")
     end
   end
 end

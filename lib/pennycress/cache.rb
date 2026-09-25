@@ -52,9 +52,20 @@ module Pennycress
     #
     # @param reference [OutputReference]
     # @param value [Object] the value to cache
-    # @return [Boolean] whether the write succeeded
+    # @return [void]
     def write(reference, value)
-      @store.write(reference.cache_key, value)
+      @store.write(reference.cache_key, value, **WRITE_OPTIONS)
+    end
+
+    # Writes multiple values to the cache
+    #
+    # @param entries [Hash{OutputReference => Object}]
+    # @return [void]
+    def write_multi(entries)
+      @store.write_multi(
+        entries.transform_keys(&:cache_key),
+        **WRITE_OPTIONS
+      )
     end
   end
 end
