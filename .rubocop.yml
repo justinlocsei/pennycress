@@ -40,6 +40,9 @@ Metrics:
 Naming/BlockForwarding:
   Enabled: false
 
+Style/ArgumentsForwarding:
+  Enabled: false
+
 Style/BlockDelimiters:
   Enabled: false
 
