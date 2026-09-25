@@ -4,6 +4,9 @@ module Pennycress
   # A cache is a thin wrapper around an ActiveSupport cache store that uses
   # specialized output references for all cache operations.
   class Cache
+    WRITE_OPTIONS = { skip_nil: true }.freeze
+    private_constant :WRITE_OPTIONS
+
     # Creates a cache
     #
     # @param store [ActiveSupport::Cache::Store] the backing cache store
@@ -25,7 +28,7 @@ module Pennycress
     # @yieldreturn [Object] the value to cache in the case of a cache miss
     # @return [Object] the cached or computed value
     def fetch(reference, &)
-      @store.fetch(reference.cache_key, &)
+      @store.fetch(reference.cache_key, **WRITE_OPTIONS, &)
     end
 
     # Reads a set of cached values, computing and storing misses
@@ -38,7 +41,7 @@ module Pennycress
       keys = references.map(&:cache_key)
       refs_by_key = keys.zip(references).to_h
 
-      cached = @store.fetch_multi(*keys) do |key|
+      cached = @store.fetch_multi(*keys, **WRITE_OPTIONS) do |key|
         yield refs_by_key.fetch(key)
       end
 
