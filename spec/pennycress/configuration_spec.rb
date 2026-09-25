@@ -37,6 +37,53 @@ RSpec.describe Pennycress::Configuration do
     end
   end
 
+  describe ".modify" do
+    it "returns a copy of the current configuration" do
+      described_class.override(
+        described_class.build { |config| config.cache_namespace = "pennycress/original" }
+      ) do
+        current = described_class.current
+        config = described_class.modify { |_| }
+
+        expect(config).to be_a(described_class)
+        expect(config).not_to equal(current)
+        expect(config.cache_namespace).to eq("pennycress/original")
+      end
+    end
+
+    it "returns the modified configuration" do
+      config = described_class.modify do |built|
+        built.cache_namespace = "pennycress/test"
+      end
+
+      expect(config.cache_namespace).to eq("pennycress/test")
+    end
+
+    it "does not modify the current configuration" do
+      described_class.override(
+        described_class.build { |config| config.cache_namespace = "pennycress/original" }
+      ) do
+        described_class.modify do |built|
+          built.cache_namespace = "pennycress/test"
+        end
+
+        expect(described_class.current.cache_namespace).to eq("pennycress/original")
+      end
+    end
+
+    it "copies the current cache store" do
+      store = ActiveSupport::Cache::MemoryStore.new
+
+      described_class.override(
+        described_class.build { |config| config.cache = store }
+      ) do
+        config = described_class.modify { |_| }
+
+        expect(config.cache).to equal(store)
+      end
+    end
+  end
+
   describe ".override" do
     it "uses the given configuration within the block" do
       custom = described_class.new

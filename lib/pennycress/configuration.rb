@@ -21,6 +21,16 @@ module Pennycress
         @current ||= new
       end
 
+      # Builds a modified copy of the current configuration
+      #
+      # @yieldparam config [Configuration] a copy of the current configuration
+      # @return [Configuration] the modified configuration
+      def modify
+        config = current.dup
+        yield config
+        config
+      end
+
       # Runs a block with a temporary configuration
       #
       # @param config [Configuration] the configuration to use
@@ -52,6 +62,14 @@ module Pennycress
     # @return [ActiveSupport::Cache::Store] the cache store to use
     def cache
       @cache ||= ActiveSupport::Cache::NullStore.new
+    end
+
+  protected
+
+    # @param original [Configuration] the configuration to copy
+    def initialize_copy(original)
+      @cache_namespace = original.cache_namespace.dup
+      @cache = original.instance_variable_get(:@cache)
     end
   end
 end
