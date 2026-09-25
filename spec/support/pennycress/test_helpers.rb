@@ -18,6 +18,19 @@ module Pennycress
       )
     end
 
+    # Runs a block with a temporary global cache namespace
+    #
+    # @param namespace [String] the global cache namespace
+    # @yield run examples against the temporary configuration
+    # @return [Object] the block's return value
+    def with_cache_namespace(namespace, &block)
+      config = Configuration.modify do |built|
+        built.cache_namespace = namespace
+      end
+
+      Configuration.override(config, &block)
+    end
+
   private
 
     # Builds a configuration backed by an in-memory cache store
@@ -25,7 +38,7 @@ module Pennycress
     # @param namespace [String] the global cache key prefix
     # @return [Configuration]
     def build_memory_cache_config(namespace)
-      Configuration.build do |config|
+      Configuration.modify do |config|
         config.cache = ActiveSupport::Cache::MemoryStore.new
         config.cache_namespace = namespace
       end
