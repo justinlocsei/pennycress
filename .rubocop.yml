@@ -19,6 +19,9 @@ Layout/SpaceInsideHashLiteralBraces:
   Enabled: true
   EnforcedStyle: space
 
+Lint/EmptyBlock:
+  Enabled: false
+
 Lint/RedundantRequireStatement:
   Enabled: false
 
