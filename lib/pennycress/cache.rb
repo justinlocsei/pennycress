@@ -14,12 +14,20 @@ module Pennycress
       @store = store
     end
 
-    # Deletes a cached value
+    # Evicts a cached value
     #
     # @param reference [OutputReference]
-    # @return [Boolean] whether an entry was removed
-    def delete(reference)
+    # @return [void]
+    def evict(reference)
       @store.delete(reference.cache_key)
+    end
+
+    # Evicts cached values
+    #
+    # @param references [Array<OutputReference>]
+    # @return [void]
+    def evict_many(references)
+      @store.delete_multi(references.map(&:cache_key))
     end
 
     # Reads a cached value, computing and storing it when absent

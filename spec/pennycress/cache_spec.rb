@@ -7,14 +7,31 @@ require "pennycress/output_reference"
 RSpec.describe Pennycress::Cache do
   let(:store) { ActiveSupport::Cache::MemoryStore.new }
   let(:cache) { described_class.new(store) }
-  let(:ref) { Pennycress::OutputReference.new(input: { id: 1 }) }
 
-  describe "#delete" do
-    it "deletes a cached value" do
+  let(:ref) { Pennycress::OutputReference.new(input: { id: 1 }) }
+  let(:other_ref) { Pennycress::OutputReference.new(input: { id: 2 }) }
+
+  describe "#evict" do
+    it "evicts a cached value" do
       cache.write(ref, "alfa")
 
-      expect(cache.delete(ref)).to be(true)
+      cache.evict(ref)
+
       expect(store.read(ref.cache_key)).to be_nil
+    end
+  end
+
+  describe "#evict_many" do
+    it "evicts cached values" do
+      cache.write_multi(
+        ref => "alfa",
+        other_ref => "bravo"
+      )
+
+      cache.evict_many([ref, other_ref])
+
+      expect(store.read(ref.cache_key)).to be_nil
+      expect(store.read(other_ref.cache_key)).to be_nil
     end
   end
 
@@ -34,8 +51,6 @@ RSpec.describe Pennycress::Cache do
   end
 
   describe "#fetch_multi" do
-    let(:other_ref) { Pennycress::OutputReference.new(input: { id: 2 }) }
-
     it "returns values in reference order" do
       results = cache.fetch_multi([other_ref, ref]) do |reference|
         reference.input[:id]
@@ -73,8 +88,6 @@ RSpec.describe Pennycress::Cache do
   end
 
   describe "#write_multi" do
-    let(:other_ref) { Pennycress::OutputReference.new(input: { id: 2 }) }
-
     it "stores multiple values in the cache" do
       cache.write_multi(
         ref => "alfa",
