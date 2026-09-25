@@ -18,7 +18,7 @@ module Pennycress
 
     # @return [String] the cache key for this reference
     def cache_key
-      @cache_key ||= [@namespace, *input_key_segments].compact.join("/")
+      @cache_key ||= [@namespace, *input_key_segments].compact.reject(&:empty?).join("/")
     end
 
   private
