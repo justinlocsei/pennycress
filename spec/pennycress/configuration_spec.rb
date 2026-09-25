@@ -146,4 +146,21 @@ RSpec.describe Pennycress::Configuration do
       expect(described_class.new.cache_namespace).to_not be_empty
     end
   end
+
+  describe "#directories" do
+    it "defaults to an empty array" do
+      expect(described_class.new.directories).to eq([])
+    end
+
+    it "is copied by modify" do
+      described_class.override(
+        described_class.build { |config| config.directories << "/tmp/values" }
+      ) do
+        config = described_class.modify {}
+
+        expect(config.directories).to eq(["/tmp/values"])
+        expect(config.directories).not_to equal(described_class.current.directories)
+      end
+    end
+  end
 end

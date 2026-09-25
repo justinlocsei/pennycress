@@ -46,17 +46,22 @@ module Pennycress
       end
     end
 
-    # @!attribute [rw] cache_namespace
-    #   @return [String] a global prefix for cache keys
-    attr_accessor :cache_namespace
-
     # @!attribute [w] cache
     #   @param value [ActiveSupport::Cache::Store]
     attr_writer :cache
 
+    # @!attribute [rw] cache_namespace
+    #   @return [String] a global prefix for cache keys
+    attr_accessor :cache_namespace
+
+    # @!attribute [rw] directories
+    #   @return [Array<String>] absolute paths to directories containing value classes
+    attr_accessor :directories
+
     # Creates a configuration
     def initialize
       @cache_namespace = "pennycress"
+      @directories = []
     end
 
     # @return [ActiveSupport::Cache::Store] the cache store to use
@@ -68,8 +73,9 @@ module Pennycress
 
     # @param original [Configuration] the configuration to copy
     def initialize_copy(original)
-      @cache_namespace = original.cache_namespace.dup
       @cache = original.instance_variable_get(:@cache)
+      @cache_namespace = original.cache_namespace.dup
+      @directories = original.directories.dup
     end
   end
 end
