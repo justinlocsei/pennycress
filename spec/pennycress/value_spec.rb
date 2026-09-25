@@ -64,6 +64,106 @@ RSpec.describe Pennycress::Value do
         'value is not an instance of Integer: "1"'
       )
     end
+
+    it "uses the configuration namespace for anonymous value classes" do
+      value_class = Class.new(Pennycress::Value) do
+        input id: Integer
+        output Integer
+
+        def compute(id:)
+          id * 2
+        end
+      end
+
+      value_class.fetch(
+        id: 3,
+        inspect_reference: ->(ref) { expect(ref.cache_key).to eq("pennycress/3") }
+      )
+    end
+
+    it "includes a multi-level constant path in the cache key" do
+      value_class = Class.new(Pennycress::Value) do
+        input id: Integer
+        output Integer
+
+        def compute(id:)
+          id * 2
+        end
+      end
+
+      stub_const("Alfa::Bravo", value_class)
+
+      value_class.fetch(
+        id: 3,
+        inspect_reference: lambda { |ref|
+          expect(ref.cache_key).to eq("pennycress/alfa/bravo/3")
+        }
+      )
+    end
+
+    it "uses the global cache namespace in the cache key" do
+      value_class = Class.new(Pennycress::Value) do
+        input id: Integer
+        output Integer
+
+        def compute(id:)
+          id * 2
+        end
+      end
+
+      stub_const("Alfa", value_class)
+
+      with_cache_namespace("pennycress/test") do
+        value_class.fetch(
+          id: 3,
+          inspect_reference: ->(ref) { expect(ref.cache_key).to eq("pennycress/test/alfa/3") }
+        )
+      end
+    end
+
+    context "with a memory cache" do
+      around do |example|
+        with_memory_cache { example.run }
+      end
+
+      it "returns a cached result without recomputing" do
+        compute_calls = 0
+
+        value_class = Class.new(Pennycress::Value) do
+          input id: Integer
+          output Integer
+
+          define_method(:compute) do |id:|
+            compute_calls += 1
+            id * 2
+          end
+        end
+
+        expect(value_class.fetch(id: 3)).to eq(6)
+        expect(value_class.fetch(id: 3)).to eq(6)
+        expect(compute_calls).to eq(1)
+      end
+
+      it "caches each input separately" do
+        compute_calls = 0
+
+        value_class = Class.new(Pennycress::Value) do
+          input id: Integer
+          output Integer
+
+          define_method(:compute) do |id:|
+            compute_calls += 1
+            id * 2
+          end
+        end
+
+        expect(value_class.fetch(id: 3)).to eq(6)
+        expect(value_class.fetch(id: 5)).to eq(10)
+        expect(value_class.fetch(id: 3)).to eq(6)
+
+        expect(compute_calls).to eq(2)
+      end
+    end
   end
 
   describe ".fetch_many" do

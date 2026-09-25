@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
+require_relative "cache"
+require_relative "configuration"
 require_relative "constraints"
 require_relative "input"
 require_relative "output"
+require_relative "output_reference"
 require_relative "value_config"
 require_relative "watched_model"
 
@@ -21,11 +24,17 @@ module Pennycress
 
       # Computes an output value for the given input
       #
+      # @param inspect_reference [Proc, nil] expose the output reference used for retrieval
       # @param input [Hash] keyword arguments that should conform to the input schema
       # @return [Object] the output value
       # @raise [ValidationError] if the input is invalid
-      def fetch(**input)
-        new.send(:fetch, **config.input.validate(input))
+      def fetch(inspect_reference: nil, **input)
+        ref = reference(**input)
+        inspect_reference&.call(ref)
+
+        cache.fetch(ref) do
+          new.send(:fetch, **ref.input)
+        end
       end
 
       # Computes an output value for each input in an enumerable
@@ -83,6 +92,41 @@ module Pennycress
       def warm
         value = new
         seeds.each { |seed| value.warm_seed(seed) }
+      end
+
+    private
+
+      # @return [Cache] the value's cache
+      def cache
+        @cache ||= Cache.new(Configuration.current.cache)
+      end
+
+      # @return [String] the value's cache namespace
+      def cache_namespace
+        @cache_namespace ||= if name
+          name.split("::").map(&:downcase).join("/")
+        else
+          ""
+        end
+      end
+
+      # Builds an output reference for the given input
+      #
+      # @param input [Hash] keyword arguments that should conform to the input schema
+      # @return [OutputReference] a reference to the cached output
+      # @raise [ValidationError] if the input is invalid
+      def reference(**input)
+        validated = config.input.validate(input)
+
+        namespace = [Configuration.current.cache_namespace, cache_namespace]
+          .compact
+          .reject(&:empty?)
+          .join("/")
+
+        OutputReference.new(
+          input: validated,
+          namespace: namespace.empty? ? nil : namespace
+        )
       end
     end
 
