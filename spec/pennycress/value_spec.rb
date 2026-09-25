@@ -240,7 +240,7 @@ RSpec.describe Pennycress::Value do
         /5/
       )
 
-      expect(computed).to eq([3])
+      expect(computed).to be_empty
     end
 
     it "raises when an input is invalid" do
@@ -301,6 +301,31 @@ RSpec.describe Pennycress::Value do
         Pennycress::ValidationError,
         'value is not an instance of Integer: "6"'
       )
+    end
+
+    context "with a memory cache" do
+      around do |example|
+        with_memory_cache { example.run }
+      end
+
+      it "returns cached results without recomputing" do
+        compute_calls = 0
+
+        value_class = Class.new(Pennycress::Value) do
+          input id: Integer
+          output Integer
+
+          define_method(:compute) do |id:|
+            compute_calls += 1
+            id * 2
+          end
+        end
+
+        expect(value_class.fetch_many([{ id: 3 }, { id: 5 }])).to eq([6, 10])
+        expect(value_class.fetch_many([{ id: 3 }, { id: 5 }, { id: 7 }])).to eq([6, 10, 14])
+
+        expect(compute_calls).to eq(3)
+      end
     end
   end
 

@@ -43,7 +43,7 @@ module Pennycress
       # @return [Array<Object>] output values
       # @raise [ValidationError] if any inputs or outputs are invalid
       def fetch_many(inputs)
-        new.send(:fetch_many, inputs).to_a
+        new.send(:fetch_many, cache, inputs).to_a
       end
 
       # Defines the value's input schema
@@ -177,26 +177,43 @@ module Pennycress
 
     # Computes an output value for each input in an enumerable
     #
+    # @param cache [Cache]
     # @param inputs [Enumerable<Hash>] inputs to validate and compute
-    # @return [Enumerable<Object>] output values
-    def fetch_many(inputs)
-      compute_many(validate_inputs(inputs)).map do |result|
+    # @return [Array<Object>] output values
+    def fetch_many(cache, inputs)
+      refs = inputs
+        .map { |input| self.class.send(:reference, **input) }
+        .to_a
+
+      misses = []
+
+      values = cache.fetch_multi(refs) do |ref|
+        misses << ref
+        nil
+      end
+
+      return values if misses.empty?
+
+      computed = compute_many(misses.map(&:input)).map do |result|
         output.validate(result)
+      end
+
+      cache.write_multi(misses.zip(computed).to_h)
+
+      index = 0
+
+      values.map do |value|
+        if value.nil?
+          computed[index].tap { index += 1 }
+        else
+          value
+        end
       end
     end
 
     # @return [Output] the value's output schema
     def output
       @output ||= self.class.config.output
-    end
-
-    # Returns a lazy list of validated inputs
-    #
-    # @param inputs [Enumerable<Hash>]
-    # @return [Enumerator::Lazy]
-    def validate_inputs(inputs)
-      input = self.class.config.input
-      inputs.lazy.map { |i| input.validate(i) }
     end
   end
 end
