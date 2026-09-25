@@ -162,7 +162,7 @@ module Pennycress
     # @param seed [Object]
     # @return [void]
     def warm_seed(seed)
-      fetch_many(seed_to_inputs(seed)).each { nil }
+      self.class.send(:fetch_many, seed_to_inputs(seed)).each { nil }
     end
 
   private
