@@ -28,6 +28,23 @@ module Pennycress
       @store.fetch(reference.cache_key, &)
     end
 
+    # Reads a set of cached values, computing and storing misses
+    #
+    # @param references [Array<OutputReference>]
+    # @yieldparam reference [OutputReference] a reference that was not cached
+    # @yieldreturn [Object] the value to cache for the reference
+    # @return [Array<Object>] cached or computed values in reference order
+    def fetch_multi(references)
+      keys = references.map(&:cache_key)
+      refs_by_key = keys.zip(references).to_h
+
+      cached = @store.fetch_multi(*keys) do |key|
+        yield refs_by_key.fetch(key)
+      end
+
+      keys.map { |key| cached.fetch(key) }
+    end
+
     # Writes a value to the cache
     #
     # @param reference [OutputReference]

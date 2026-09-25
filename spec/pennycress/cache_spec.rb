@@ -33,6 +33,35 @@ RSpec.describe Pennycress::Cache do
     end
   end
 
+  describe "#fetch_multi" do
+    let(:other_ref) { Pennycress::OutputReference.new(input: { id: 99 }) }
+
+    it "returns values in reference order" do
+      results = cache.fetch_multi([other_ref, ref]) do |reference|
+        reference.input[:id]
+      end
+
+      expect(results).to eq([99, 42])
+    end
+
+    it "computes only uncached references" do
+      cache.write(ref, 84)
+      computed = []
+
+      results = cache.fetch_multi([ref, other_ref]) do |reference|
+        computed << reference
+        reference.input[:id]
+      end
+
+      expect(results).to eq([84, 99])
+      expect(computed).to eq([other_ref])
+    end
+
+    it "returns an empty array for no references" do
+      expect(cache.fetch_multi([]) { 99 }).to eq([])
+    end
+  end
+
   describe "#write" do
     it "stores a value in the cache" do
       expect(store.read(ref.cache_key)).to be_nil
