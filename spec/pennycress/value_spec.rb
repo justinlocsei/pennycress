@@ -222,6 +222,14 @@ RSpec.describe Pennycress::Value do
         input name: String
       end
     end
+
+    it "raises when a named field reuses a model ID" do
+      expect {
+        Class.new(Pennycress::Value) do
+          input :channel, channel: String
+        end
+      }.to raise_error(ArgumentError, "named fields cannot reuse model IDs: :channel")
+    end
   end
 
   describe ".seeds" do
