@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "configuration"
-require_relative "output_reference"
-
 module Pennycress
   # A cache is a thin wrapper around an ActiveSupport cache store that uses
   # specialized output references for all cache operations.
@@ -10,13 +7,13 @@ module Pennycress
     # Creates a cache
     #
     # @param store [ActiveSupport::Cache::Store] the backing cache store
-    def initialize(store: Configuration.current.cache)
+    def initialize(store)
       @store = store
     end
 
     # Deletes a cached value
     #
-    # @param reference [OutputReference] the output reference to delete
+    # @param reference [OutputReference]
     # @return [Boolean] whether an entry was removed
     def delete(reference)
       @store.delete(reference.cache_key)
@@ -24,7 +21,7 @@ module Pennycress
 
     # Reads a cached value, computing and storing it when absent
     #
-    # @param reference [OutputReference] the output reference to fetch
+    # @param reference [OutputReference]
     # @yieldreturn [Object] the value to cache in the case of a cache miss
     # @return [Object] the cached or computed value
     def fetch(reference, &)
@@ -33,7 +30,7 @@ module Pennycress
 
     # Writes a value to the cache
     #
-    # @param reference [OutputReference] the output reference to write
+    # @param reference [OutputReference]
     # @param value [Object] the value to cache
     # @return [Boolean] whether the write succeeded
     def write(reference, value)

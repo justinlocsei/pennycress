@@ -6,7 +6,7 @@ require "pennycress/output_reference"
 
 RSpec.describe Pennycress::Cache do
   let(:store) { ActiveSupport::Cache::MemoryStore.new }
-  let(:cache) { described_class.new(store: store) }
+  let(:cache) { described_class.new(store) }
   let(:ref) { Pennycress::OutputReference.new(input: { id: 42 }) }
 
   describe "#delete" do
