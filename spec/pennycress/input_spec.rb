@@ -5,6 +5,14 @@ require "pennycress/errors"
 require "pennycress/input"
 
 RSpec.describe Pennycress::Input do
+  describe ".new" do
+    it "raises when a named field reuses a model ID" do
+      expect do
+        Pennycress::Input.new(model_ids: [:channel], named: { channel: String })
+      end.to raise_error(ArgumentError, "named fields cannot reuse model IDs: :channel")
+    end
+  end
+
   describe "#empty?" do
     it "is true when there are no models or named fields" do
       expect(Pennycress::Input.new).to be_empty

@@ -17,8 +17,16 @@ module Pennycress
     #
     # @param model_ids [Array<Symbol>] model IDs (e.g., `[:uploaded_file, :user]`)
     # @param named [Hash{Symbol => Class}] named fields (e.g., `{ id: Integer }`)
+    # @raise [ArgumentError] if model IDs and named fields conflict
     def initialize(model_ids: [], named: {})
       @model_ids = model_ids.uniq.sort
+      conflicts = @model_ids & named.keys
+
+      unless conflicts.empty?
+        keys = conflicts.map { |key| ":#{key}" }.join(", ")
+        raise ArgumentError, "named fields cannot reuse model IDs: #{keys}"
+      end
+
       @named = named
     end
 
