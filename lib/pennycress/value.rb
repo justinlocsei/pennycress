@@ -6,6 +6,7 @@ require_relative "constraints"
 require_relative "input"
 require_relative "output"
 require_relative "output_reference"
+require_relative "registry"
 require_relative "value_config"
 require_relative "watched_model"
 
@@ -17,6 +18,13 @@ module Pennycress
     include Constraints
 
     class << self
+      # @param value [Class] the value being defined
+      # @return [void]
+      def inherited(value)
+        super
+        Registry.current.register(value)
+      end
+
       # @return [ValueConfig] the value's configuration
       def config
         @config ||= ValueConfig.new

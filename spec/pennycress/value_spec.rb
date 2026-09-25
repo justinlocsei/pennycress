@@ -1,10 +1,25 @@
 # frozen_string_literal: true
 
 require "pennycress/errors"
+require "pennycress/registry"
 require "pennycress/value"
 require "pennycress/value_config"
 
 RSpec.describe Pennycress::Value do
+  it "registers subclasses in the current registry" do
+    first = Class.new(Pennycress::Value) do
+      input id: Integer
+      output Integer
+    end
+
+    second = Class.new(Pennycress::Value) do
+      input name: String
+      output String
+    end
+
+    expect(Pennycress::Registry.current.values).to contain_exactly(first, second)
+  end
+
   describe ".config" do
     it "returns the value's configuration" do
       value = Class.new(Pennycress::Value) do
