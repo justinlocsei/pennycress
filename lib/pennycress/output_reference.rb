@@ -10,15 +10,15 @@ module Pennycress
     # Creates an output reference
     #
     # @param input [Hash] a validated input
-    # @param namespace [String] a namespace that contains the value's outputs
-    def initialize(input:, namespace:)
+    # @param namespace [String, nil] a namespace that contains the value's outputs
+    def initialize(input:, namespace: nil)
       @input = input
       @namespace = namespace
     end
 
     # @return [String] the cache key for this reference
     def cache_key
-      @cache_key ||= [@namespace, *input_key_segments].join("/")
+      @cache_key ||= [@namespace, *input_key_segments].compact.join("/")
     end
 
   private

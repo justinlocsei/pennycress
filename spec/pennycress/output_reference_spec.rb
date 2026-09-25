@@ -5,10 +5,7 @@ require "pennycress/output_reference"
 
 RSpec.describe Pennycress::OutputReference do
   let(:reference) do
-    described_class.new(
-      input: { id: 42, user: user },
-      namespace: "ns"
-    )
+    described_class.new(input: { id: 42, user: user })
   end
 
   let(:post_class) { Class.new(ActiveRecord::Base) }
@@ -26,8 +23,8 @@ RSpec.describe Pennycress::OutputReference do
   end
 
   describe "#cache_key" do
-    it "combines the namespace and a key for the input" do
-      expect(reference.cache_key).to eq("ns/42/7")
+    it "builds a key from the input" do
+      expect(reference.cache_key).to eq("42/7")
     end
 
     it "returns a stable value" do
@@ -42,18 +39,20 @@ RSpec.describe Pennycress::OutputReference do
       allow(post).to receive(:id).and_return(42)
 
       ref = described_class.new(
-        input: { id: 1, name: "Alice", post: post, user: user },
-        namespace: "ns"
+        input: { id: 1, name: "Alice", post: post, user: user }
       )
 
-      expect(ref.cache_key).to eq("ns/1/alice/42/7")
+      expect(ref.cache_key).to eq("1/alice/42/7")
     end
 
     it "omits nil values" do
-      ref = described_class.new(
-        input: { id: 42, label: nil },
-        namespace: "ns"
-      )
+      ref = described_class.new(input: { id: 42, label: nil })
+
+      expect(ref.cache_key).to eq("42")
+    end
+
+    it "includes a namespace when provided" do
+      ref = described_class.new(input: { id: 42 }, namespace: "ns")
 
       expect(ref.cache_key).to eq("ns/42")
     end
