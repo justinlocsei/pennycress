@@ -6,7 +6,7 @@ require "pennycress/configuration"
 RSpec.describe Pennycress::Configuration do
   describe ".build" do
     it "returns a new configuration" do
-      config = described_class.build { |_| }
+      config = described_class.build {}
 
       expect(config).to be_a(described_class)
       expect(config).not_to equal(described_class.current)
@@ -43,7 +43,7 @@ RSpec.describe Pennycress::Configuration do
         described_class.build { |config| config.cache_namespace = "pennycress/original" }
       ) do
         current = described_class.current
-        config = described_class.modify { |_| }
+        config = described_class.modify {}
 
         expect(config).to be_a(described_class)
         expect(config).not_to equal(current)
@@ -77,7 +77,7 @@ RSpec.describe Pennycress::Configuration do
       described_class.override(
         described_class.build { |config| config.cache = store }
       ) do
-        config = described_class.modify { |_| }
+        config = described_class.modify {}
 
         expect(config.cache).to equal(store)
       end
