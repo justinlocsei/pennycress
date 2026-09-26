@@ -23,17 +23,17 @@ module Pennycress
       @inputs = inputs
     end
 
-    # @return [Class] the watched ActiveRecord model class
-    def model_class
-      @model_class ||= Models.resolve(id)
-    end
-
     # Produces invalidation inputs for a given model
     #
     # @param model [ActiveRecord::Base] a changed model instance
     # @return [Enumerable<Hash>] invalidation inputs
     def inputs_for(model)
       inputs.call(model)
+    end
+
+    # @return [Class] the watched ActiveRecord model class
+    def model_class
+      @model_class ||= Models.resolve(id)
     end
   end
 end
