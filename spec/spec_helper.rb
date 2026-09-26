@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "pennycress/registry"
+require "support/active_job"
 require "support/pennycress/test_helpers"
 
 RSpec.configure do |config|
