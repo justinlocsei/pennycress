@@ -59,7 +59,7 @@ module Pennycress
             model = watch.model_class
 
             model_handlers[model] << lambda do |record|
-              value_class.invalidate(watch, record)
+              value_class.invalidate_model(watch, record)
             end
           end
         end
