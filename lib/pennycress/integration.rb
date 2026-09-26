@@ -34,6 +34,7 @@ module Pennycress
       #
       # @param directories [Array<String>] absolute directory paths
       # @return [void]
+      # @raise [ArgumentError] if a path is not a directory
       def load_values(directories)
         directories.each do |directory|
           unless File.directory?(directory)
