@@ -11,6 +11,10 @@ module Pennycress
     DEFAULT_DIRECTORIES = ["app/values"].freeze
     private_constant :DEFAULT_DIRECTORIES
 
+    rake_tasks do
+      load File.expand_path("../tasks/pennycress.rake", __dir__)
+    end
+
     initializer "pennycress.directories", after: :load_config_initializers do
       config = Configuration.current
 
