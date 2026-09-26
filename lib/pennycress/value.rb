@@ -30,6 +30,15 @@ module Pennycress
         @config ||= ValueConfig.new
       end
 
+      # Evicts cached outputs for the given inputs
+      #
+      # @param inputs [Enumerable<Hash>] a list of keyword arguments for inputs
+      # @return [void]
+      # @raise [ValidationError] if any inputs are invalid
+      def evict_many(inputs)
+        cache.evict_many(inputs.map { |input| reference(input) }.to_a)
+      end
+
       # Computes an output value for the given input
       #
       # @param inspect_reference [Proc, nil] expose the output reference used for retrieval

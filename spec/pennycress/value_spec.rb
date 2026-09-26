@@ -31,6 +31,46 @@ RSpec.describe Pennycress::Value do
     end
   end
 
+  describe ".evict_many" do
+    let(:value_class) do
+      Class.new(Pennycress::Value) do
+        input id: Integer
+        output Integer
+
+        def compute(id:)
+          id * 2
+        end
+      end
+    end
+
+    context "with a memory cache" do
+      around do |example|
+        with_memory_cache { example.run }
+      end
+
+      it "evicts cached outputs" do
+        compute_calls = 0
+
+        value_class.class_eval do
+          define_method(:compute) do |id:|
+            compute_calls += 1
+            id * 2
+          end
+        end
+
+        value_class.fetch_many([{ id: 3 }, { id: 5 }])
+        value_class.evict_many([{ id: 3 }, { id: 5 }])
+        value_class.fetch_many([{ id: 3 }, { id: 5 }])
+
+        expect(compute_calls).to eq(4)
+      end
+
+      it "does nothing for an empty list" do
+        expect { value_class.evict_many([]) }.not_to raise_error
+      end
+    end
+  end
+
   describe ".fetch" do
     let(:doubled_value) do
       Class.new(Pennycress::Value) do
