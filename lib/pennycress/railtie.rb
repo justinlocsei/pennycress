@@ -2,6 +2,8 @@
 
 require "rails/railtie"
 require_relative "configuration"
+require_relative "integration"
+require_relative "registry"
 
 module Pennycress
   # This Railtie integrates Pennycress with Rails.
@@ -16,6 +18,12 @@ module Pennycress
         Rails.root,
         config.directories.empty? ? DEFAULT_DIRECTORIES : config.directories
       )
+    end
+
+    config.to_prepare do
+      Registry.current.reset
+      Integration.load_values(Configuration.current.directories)
+      Integration.watch_models
     end
   end
 end
