@@ -28,6 +28,9 @@ Layout/SpaceInsideHashLiteralBraces:
   Enabled: true
   EnforcedStyle: space
 
+Lint/RedundantDirGlobSort:
+  Enabled: false
+
 Lint/EmptyBlock:
   Enabled: false
 
