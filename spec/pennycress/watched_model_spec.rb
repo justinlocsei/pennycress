@@ -32,4 +32,30 @@ RSpec.describe Pennycress::WatchedModel do
       expect(watched_model.model_class).to eq(discussion)
     end
   end
+
+  describe "#on" do
+    it "defaults to all commit actions" do
+      watched_model = described_class.new(:discussion) { [] }
+
+      expect(watched_model.on).to eq(described_class::ACTIONS)
+    end
+
+    it "accepts a narrowed list of commit actions" do
+      watched_model = described_class.new(:discussion, on: %i[create update]) { [] }
+
+      expect(watched_model.on).to eq(%i[create update])
+    end
+
+    it "raises when empty" do
+      expect {
+        described_class.new(:discussion, on: []) { [] }
+      }.to raise_error(ArgumentError, "commit actions cannot be empty")
+    end
+
+    it "raises when unsupported actions are given" do
+      expect {
+        described_class.new(:discussion, on: %i[explode undo update]) { [] }
+      }.to raise_error(ArgumentError, "unsupported commit actions: :explode, :undo")
+    end
+  end
 end
