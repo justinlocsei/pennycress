@@ -2,6 +2,7 @@
 
 require "active_support/cache"
 require "pennycress/configuration"
+require "pathname"
 
 RSpec.describe Pennycress::Configuration do
   describe ".build" do
@@ -144,6 +145,28 @@ RSpec.describe Pennycress::Configuration do
   describe "#cache_namespace" do
     it "has a default value" do
       expect(described_class.new.cache_namespace).to_not be_empty
+    end
+  end
+
+  describe ".expand_paths" do
+    let(:root) { "/app" }
+
+    it "returns absolute paths unchanged" do
+      expect(described_class.expand_paths(root, ["/app/values"])).to eq(["/app/values"])
+    end
+
+    it "expands relative paths against the root" do
+      expect(described_class.expand_paths(root, ["app/values"])).to eq(["/app/app/values"])
+    end
+
+    it "expands each path in a list" do
+      paths = described_class.expand_paths(root, ["app/values", "/custom/values"])
+
+      expect(paths).to eq(["/app/app/values", "/custom/values"])
+    end
+
+    it "can use a pathname as the root" do
+      expect(described_class.expand_paths(Pathname.new(root), ["app/values"])).to eq(["/app/app/values"])
     end
   end
 

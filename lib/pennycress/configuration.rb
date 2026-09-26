@@ -21,6 +21,17 @@ module Pennycress
         @current ||= new
       end
 
+      # Expands relative paths against a root
+      #
+      # @param root [Pathname, String] the root for relative paths
+      # @param paths [Array<String>] paths to expand
+      # @return [Array<String>] absolute paths
+      def expand_paths(root, paths)
+        paths.map do |path|
+          File.absolute_path?(path) ? path : File.join(root, path)
+        end
+      end
+
       # Builds a modified copy of the current configuration
       #
       # @yieldparam config [Configuration] a copy of the current configuration
