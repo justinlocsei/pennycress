@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "models"
+
 module Pennycress
   # A watched model describes a model observed by a value.  When the model
   # changes, a value has the chance to selectively invalidate itself by deriving
@@ -19,6 +21,11 @@ module Pennycress
     def initialize(id, &inputs)
       @id = id
       @inputs = inputs
+    end
+
+    # @return [Class] the watched ActiveRecord model class
+    def model_class
+      @model_class ||= Models.resolve(id)
     end
 
     # Produces invalidation inputs for a given model

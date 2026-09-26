@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "active_record"
 require "pennycress/watched_model"
 
 RSpec.describe Pennycress::WatchedModel do
@@ -8,6 +9,17 @@ RSpec.describe Pennycress::WatchedModel do
       watched_model = described_class.new(:discussion) { [] }
 
       expect(watched_model.id).to eq(:discussion)
+    end
+  end
+
+  describe "#model_class" do
+    it "resolves the watched model ID to a class" do
+      discussion = Class.new(ActiveRecord::Base)
+      stub_const("Discussion", discussion)
+
+      watched_model = described_class.new(:discussion) { [] }
+
+      expect(watched_model.model_class).to eq(discussion)
     end
   end
 
