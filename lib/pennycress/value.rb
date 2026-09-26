@@ -105,11 +105,12 @@ module Pennycress
       # Registers a watch on a model
       #
       # @param id [Symbol] the model ID to watch (e.g., `:discussion`)
+      # @param on [Array<Symbol>] commit actions that trigger invalidation
       # @yieldparam model [ActiveRecord::Base] the changed model instance
       # @yieldreturn [Enumerable<Hash>] inputs to refresh
       # @return [void]
-      def watch(id, &inputs)
-        config.watches << WatchedModel.new(id, &inputs)
+      def watch(id, on: WatchedModel::ACTIONS, &inputs)
+        config.watches << WatchedModel.new(id, on: on, &inputs)
       end
 
       # Warms the cache for each seed

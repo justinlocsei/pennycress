@@ -509,6 +509,17 @@ RSpec.describe Pennycress::Value do
       expect(watches.length).to eq(1)
       expect(watches.first.id).to eq(:discussion)
       expect(watches.first.inputs_for(1)).to eq([{ id: 1 }])
+      expect(watches.first.on).to eq(Pennycress::WatchedModel::ACTIONS)
+    end
+
+    it "accepts a narrowed list of commit actions" do
+      value = Class.new(Pennycress::Value) do
+        watch :discussion, on: %i[create update] do |discussion|
+          [{ id: discussion }]
+        end
+      end
+
+      expect(value.config.watches.first.on).to eq(%i[create update])
     end
 
     it "supports multiple watches" do
