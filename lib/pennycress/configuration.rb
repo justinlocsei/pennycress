@@ -69,10 +69,15 @@ module Pennycress
     #   @return [Array<String>] absolute paths to directories containing value classes
     attr_accessor :directories
 
+    # @!attribute [rw] warming_queue
+    #   @return [Symbol] the queue for the warming job
+    attr_accessor :warming_queue
+
     # Creates a configuration
     def initialize
       @cache_namespace = "pennycress"
       @directories = []
+      @warming_queue = :default
     end
 
     # @return [ActiveSupport::Cache::Store] the cache store to use
@@ -87,6 +92,7 @@ module Pennycress
       @cache = original.instance_variable_get(:@cache)
       @cache_namespace = original.cache_namespace.dup
       @directories = original.directories.dup
+      @warming_queue = original.warming_queue
     end
   end
 end

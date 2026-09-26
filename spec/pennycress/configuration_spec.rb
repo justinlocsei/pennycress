@@ -170,6 +170,22 @@ RSpec.describe Pennycress::Configuration do
     end
   end
 
+  describe "#warming_queue" do
+    it "has a default value" do
+      expect(described_class.new.warming_queue).to eq(:default)
+    end
+
+    it "is copied by modify" do
+      described_class.override(
+        described_class.build { |config| config.warming_queue = :pennycress_warming }
+      ) do
+        config = described_class.modify {}
+
+        expect(config.warming_queue).to eq(:pennycress_warming)
+      end
+    end
+  end
+
   describe "#directories" do
     it "defaults to an empty array" do
       expect(described_class.new.directories).to eq([])
