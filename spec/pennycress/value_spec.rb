@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "active_record"
 require "pennycress/errors"
 require "pennycress/registry"
 require "pennycress/value"
@@ -409,6 +410,61 @@ RSpec.describe Pennycress::Value do
           input :channel, channel: String
         end
       }.to raise_error(ArgumentError, "named fields cannot reuse model IDs: :channel")
+    end
+  end
+
+  describe ".invalidate_model" do
+    it "evicts only inputs derived from the given model" do
+      discussion = Class.new(ActiveRecord::Base) do
+        attr_accessor :id
+      end
+
+      stub_const("Discussion", discussion)
+      compute_calls = 0
+
+      value_class = Class.new(Pennycress::Value) do
+        input id: Integer
+        output Integer
+
+        define_method(:compute) do |id:|
+          compute_calls += 1
+          id * 2
+        end
+
+        watch :discussion do |record|
+          [{ id: record.id }]
+        end
+      end
+
+      watch = value_class.config.watches.first
+      expect(watch).to_not be_nil
+
+      with_memory_cache do
+        value_class.fetch_many([{ id: 1 }, { id: 2 }])
+        expect(compute_calls).to eq(2)
+
+        first = discussion.allocate
+        first.id = 1
+
+        second = discussion.allocate
+        second.id = 2
+
+        value_class.invalidate_model(watch, first)
+
+        value_class.fetch(id: 1)
+        expect(compute_calls).to eq(3)
+
+        value_class.fetch(id: 2)
+        expect(compute_calls).to eq(3)
+
+        value_class.invalidate_model(watch, second)
+
+        value_class.fetch(id: 1)
+        expect(compute_calls).to eq(3)
+
+        value_class.fetch(id: 2)
+        expect(compute_calls).to eq(4)
+      end
     end
   end
 

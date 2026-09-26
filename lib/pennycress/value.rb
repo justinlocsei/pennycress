@@ -72,6 +72,15 @@ module Pennycress
         config.input = Input.new(model_ids: model_ids, named: other)
       end
 
+      # Invalidate cached outputs for a watched model
+      #
+      # @param watch [WatchedModel] the watch that produced the change
+      # @param model [ActiveRecord::Base] the changed model instance
+      # @return [void]
+      def invalidate_model(watch, model)
+        evict_many(watch.inputs_for(model))
+      end
+
       # Defines the value's output schema
       #
       # @param schema [Class, Hash{Symbol => Class}] a scalar type or shape hash
