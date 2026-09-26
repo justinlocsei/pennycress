@@ -37,7 +37,7 @@ module Pennycress
       # @return [Object] the output value
       # @raise [ValidationError] if the input is invalid
       def fetch(inspect_reference: nil, **input)
-        ref = reference(**input)
+        ref = reference(input)
         inspect_reference&.call(ref)
 
         cache.fetch(ref) do
@@ -123,7 +123,7 @@ module Pennycress
       # @param input [Hash] keyword arguments that should conform to the input schema
       # @return [OutputReference] a reference to the cached output
       # @raise [ValidationError] if the input is invalid
-      def reference(**input)
+      def reference(input)
         validated = config.input.validate(input)
 
         namespace = [Configuration.current.cache_namespace, cache_namespace]
@@ -190,7 +190,7 @@ module Pennycress
     # @return [Array<Object>] output values
     def fetch_many(cache, inputs)
       refs = inputs
-        .map { |input| self.class.send(:reference, **input) }
+        .map { |input| self.class.send(:reference, input) }
         .to_a
 
       misses = []
