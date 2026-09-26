@@ -22,8 +22,10 @@ module Pennycress
       # @param record [ActiveRecord::Base] a committed model instance
       # @return [void]
       def handle_commit(record)
+        action = commit_action(record)
+
         model_handlers[record.class].each do |handler|
-          handler.call(record)
+          handler.call(record, action)
         end
       end
 
@@ -56,10 +58,10 @@ module Pennycress
 
         Registry.current.values.each do |value_class|
           value_class.config.watches.each do |watch|
-            model = watch.model_class
-
-            model_handlers[model] << lambda do |record|
-              value_class.invalidate_model(watch, record)
+            model_handlers[watch.model_class] << lambda do |record, action|
+              if watch.on.include?(action)
+                value_class.invalidate_model(watch, record)
+              end
             end
           end
         end
@@ -72,6 +74,18 @@ module Pennycress
       end
 
     private
+
+      # @param record [ActiveRecord::Base] a committed model instance
+      # @return [Symbol] the commit action that triggered the callback
+      def commit_action(record)
+        if record.destroyed?
+          :destroy
+        elsif record.previously_new_record?
+          :create
+        else
+          :update
+        end
+      end
 
       # @return [Hash{Class => Array<Proc>}] a mapping of model classes to invalidation handlers
       def model_handlers
