@@ -52,6 +52,9 @@ Style/BlockDelimiters:
 Style/EmptyLiteral:
   Enabled: false
 
+Style/HashEachMethods:
+  Enabled: false
+
 Style/IfUnlessModifier:
   Enabled: false
 
