@@ -15,8 +15,10 @@ module Pennycress
       load File.expand_path("../tasks/pennycress.rake", __dir__)
     end
 
-    initializer "pennycress.directories", after: :load_config_initializers do
+    initializer "pennycress.setup", after: :load_config_initializers do
       config = Configuration.current
+
+      config.cache = Rails.cache
 
       config.directories = Configuration.expand_paths(
         Rails.root,
