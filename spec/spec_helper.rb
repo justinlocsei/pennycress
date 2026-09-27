@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "support/simplecov"
+
 require "pennycress/registry"
 require "support/active_job"
 require "support/integration"
