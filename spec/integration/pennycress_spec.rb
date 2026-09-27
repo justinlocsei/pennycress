@@ -31,6 +31,16 @@ RSpec.describe Pennycress do
     expect(DiscussionTitle.compute_calls).to eq(2)
   end
 
+  it "fetches by primary key value without loading the model on a cache hit" do
+    discussion = Discussion.create!(title: "Alfa")
+    allow(Discussion).to receive(:find).and_call_original
+
+    expect(DiscussionTitle.fetch(discussion: discussion.id)).to eq("Alfa")
+    expect(DiscussionTitle.fetch(discussion: discussion.id)).to eq("Alfa")
+    expect(DiscussionTitle.compute_calls).to eq(1)
+    expect(Discussion).to have_received(:find).once
+  end
+
   it "supports synchronous cache warming" do
     discussion = Discussion.create!(title: "Alfa")
 
