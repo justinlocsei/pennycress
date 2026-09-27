@@ -84,7 +84,11 @@ RSpec.describe Pennycress::OutputReference do
     end
   end
 
-  describe "#compute_input" do
+  describe "#input" do
+    it "returns values suitable for compute" do
+      expect(reference.input).to eq({ id: 42, user: user })
+    end
+
     it "resolves model references to instances" do
       ref = described_class.new(
         input: {
@@ -97,13 +101,7 @@ RSpec.describe Pennycress::OutputReference do
         }
       )
 
-      expect(ref.compute_input).to eq({ discussion: user, id: 42 })
-    end
-  end
-
-  describe "#input" do
-    it "returns the validated input" do
-      expect(reference.input).to eq({ id: 42, user: user })
+      expect(ref.input).to eq({ discussion: user, id: 42 })
     end
   end
 end

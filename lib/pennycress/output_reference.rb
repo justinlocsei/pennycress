@@ -6,15 +6,12 @@ module Pennycress
   # An output reference identifies a cached output for a computed value produced
   # from a single input.
   class OutputReference
-    # @return [Hash] a validated input
-    attr_reader :input
-
     # Creates an output reference
     #
     # @param input [Hash] a validated input
     # @param namespace [String, nil] a namespace that contains the value's outputs
     def initialize(input:, namespace: nil)
-      @input = input
+      @raw_input = input
       @namespace = namespace
     end
 
@@ -24,8 +21,8 @@ module Pennycress
     end
 
     # @return [Hash] the input in a form suitable for computing an output value
-    def compute_input
-      input.transform_values do |value|
+    def input
+      @input ||= @raw_input.transform_values do |value|
         value.is_a?(ModelReference) ? value.record : value
       end
     end
@@ -34,8 +31,8 @@ module Pennycress
 
     # @return [Array<String>] segments in the cache key for the input
     def input_key_segments
-      input.keys.sort.flat_map do |key|
-        value = input[key]
+      @raw_input.keys.sort.flat_map do |key|
+        value = @raw_input[key]
         next [] unless value
 
         value_to_key(value).map(&:downcase)
