@@ -1,0 +1,3 @@
+test:
+  adapter: sqlite3
+  database: storage/test.sqlite3

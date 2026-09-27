@@ -5,6 +5,8 @@ AllCops:
   Include:
     - lib/**/*.rb
     - spec/**/*.rb
+  Exclude:
+    - spec/dummy/**/*
 
 Layout/AccessModifierIndentation:
   Enabled: false
