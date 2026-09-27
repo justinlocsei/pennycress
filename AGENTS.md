@@ -33,6 +33,7 @@ Coding preferences for this project. Not architectural guidance — see the code
 - Specs should be obvious: assert after each meaningful step when behavior is sequential (e.g. compute counts per fetch).
 - Prefer isolated registries/config via `override` over mutating global state and resetting in hooks.
 - Use descriptive stand-ins in examples (NATO words, small fixed ids) rather than arbitrary magic values when it aids reading.
+- Use the classic NATO spellings in stand-in strings (e.g. `Alfa`, not `Alpha`).
 
 ## Git
 
