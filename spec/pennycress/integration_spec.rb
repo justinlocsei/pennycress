@@ -15,17 +15,8 @@ RSpec.describe Pennycress::Integration do
       end
 
       stub_const("Discussion", discussion)
-      compute_calls = 0
 
-      value = Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
-
-        define_method(:compute) do |id:|
-          compute_calls += 1
-          id
-        end
-
+      value = identity_value_class do
         watch :discussion do |record|
           [{ id: record.id }]
         end
@@ -35,7 +26,7 @@ RSpec.describe Pennycress::Integration do
         described_class.watch_models
 
         value.fetch(id: 1)
-        expect(compute_calls).to eq(1)
+        expect(value.compute_calls).to eq(1)
 
         record = discussion.allocate
         record.id = 1
@@ -43,7 +34,7 @@ RSpec.describe Pennycress::Integration do
         described_class.handle_commit(record)
 
         value.fetch(id: 1)
-        expect(compute_calls).to eq(2)
+        expect(value.compute_calls).to eq(2)
       end
     end
 
@@ -57,17 +48,8 @@ RSpec.describe Pennycress::Integration do
       end
 
       stub_const("Discussion", discussion)
-      compute_calls = 0
 
-      value = Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
-
-        define_method(:compute) do |id:|
-          compute_calls += 1
-          id
-        end
-
+      value = identity_value_class do
         watch :discussion do |record|
           [{ id: record.id }]
         end
@@ -77,7 +59,7 @@ RSpec.describe Pennycress::Integration do
         described_class.watch_models
 
         value.fetch(id: 1)
-        expect(compute_calls).to eq(1)
+        expect(value.compute_calls).to eq(1)
 
         record = discussion.allocate
         record.id = 1
@@ -85,7 +67,7 @@ RSpec.describe Pennycress::Integration do
         described_class.handle_commit(record)
 
         value.fetch(id: 1)
-        expect(compute_calls).to eq(2)
+        expect(value.compute_calls).to eq(2)
       end
     end
   end
