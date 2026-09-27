@@ -46,6 +46,48 @@ RSpec.describe Pennycress::Integration do
         expect(compute_calls).to eq(2)
       end
     end
+
+    it "evicts cached outputs when a watched model is destroyed" do
+      discussion = Class.new(ActiveRecord::Base) do
+        attr_accessor :id
+
+        def destroyed?
+          true
+        end
+      end
+
+      stub_const("Discussion", discussion)
+      compute_calls = 0
+
+      value = Class.new(Pennycress::Value) do
+        input id: Integer
+        output Integer
+
+        define_method(:compute) do |id:|
+          compute_calls += 1
+          id
+        end
+
+        watch :discussion do |record|
+          [{ id: record.id }]
+        end
+      end
+
+      with_memory_cache do
+        described_class.watch_models
+
+        value.fetch(id: 1)
+        expect(compute_calls).to eq(1)
+
+        record = discussion.allocate
+        record.id = 1
+
+        described_class.handle_commit(record)
+
+        value.fetch(id: 1)
+        expect(compute_calls).to eq(2)
+      end
+    end
   end
 
   describe ".load_values" do
