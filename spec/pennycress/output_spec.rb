@@ -4,6 +4,15 @@ require "pennycress/errors"
 require "pennycress/output"
 
 RSpec.describe Pennycress::Output do
+  describe "#initialize" do
+    it "raises when the schema is a primitive" do
+      expect { described_class.new("Integer") }.to raise_error(
+        ArgumentError,
+        "output must be a type or a shape hash"
+      )
+    end
+  end
+
   describe "#validate" do
     it "validates a scalar type" do
       output = described_class.new(Integer)
