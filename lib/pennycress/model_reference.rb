@@ -17,14 +17,14 @@ module Pennycress
       # @param label [String] the input label used in error messages
       # @return [ModelReference]
       # @raise [ValidationError] if the value is invalid
-      def normalize(model_class, value, label:)
+      def from(model_class, value, label:)
         result =
           if value.is_a?(model_class)
-            normalize_instance(model_class, value)
+            from_instance(model_class, value)
           elsif model_class.composite_primary_key?
-            normalize_composite_key(model_class, value)
+            from_composite_key(model_class, value)
           else
-            normalize_scalar_key(model_class, value)
+            from_scalar_key(model_class, value)
           end
 
         raise ValidationError, "#{label} #{result}" if result.is_a?(String)
@@ -37,7 +37,7 @@ module Pennycress
       # @param model_class [ActiveRecord::Base]
       # @param value [Object]
       # @return [ModelReference, String]
-      def normalize_composite_key(model_class, value)
+      def from_composite_key(model_class, value)
         length = model_class.primary_key.length
 
         unless value.is_a?(Array)
@@ -56,7 +56,7 @@ module Pennycress
       # @param model_class [ActiveRecord::Base]
       # @param instance [ActiveRecord::Base]
       # @return [ModelReference, String]
-      def normalize_instance(model_class, instance)
+      def from_instance(model_class, instance)
         id =
           begin
             instance.id
@@ -74,7 +74,7 @@ module Pennycress
       # @param model_class [ActiveRecord::Base]
       # @param value [Object]
       # @return [ModelReference, String]
-      def normalize_scalar_key(model_class, value)
+      def from_scalar_key(model_class, value)
         if scalar_key?(value)
           new(id: value, model_class: model_class)
         else

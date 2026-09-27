@@ -18,24 +18,24 @@ RSpec.describe Pennycress::ModelReference do
     end
   end
 
-  describe ".normalize" do
+  describe ".from" do
     it "accepts a persisted model instance" do
       record = build_record
 
-      reference = described_class.normalize(discussion_class, record, label: "discussion")
+      reference = described_class.from(discussion_class, record, label: "discussion")
 
       expect(reference.id).to eq(1)
       expect(reference.record).to equal(record)
     end
 
     it "accepts a scalar primary key value" do
-      reference = described_class.normalize(discussion_class, 42, label: "discussion")
+      reference = described_class.from(discussion_class, 42, label: "discussion")
 
       expect(reference.id).to eq(42)
     end
 
     it "accepts string primary key values" do
-      reference = described_class.normalize(discussion_class, "42", label: "discussion")
+      reference = described_class.from(discussion_class, "42", label: "discussion")
 
       expect(reference.id).to eq("42")
     end
@@ -46,20 +46,20 @@ RSpec.describe Pennycress::ModelReference do
       allow(record).to receive(:new_record?).and_return(true)
 
       expect {
-        described_class.normalize(discussion_class, record, label: "discussion")
+        described_class.from(discussion_class, record, label: "discussion")
       }.to raise_error(Pennycress::ValidationError, "discussion must be persisted")
     end
 
     it "raises when a scalar primary key value is invalid" do
       expect {
-        described_class.normalize(discussion_class, nil, label: "discussion")
+        described_class.from(discussion_class, nil, label: "discussion")
       }.to raise_error(
         Pennycress::ValidationError,
         "discussion must be a Discussion or a primary key value: nil"
       )
 
       expect {
-        described_class.normalize(discussion_class, {}, label: "discussion")
+        described_class.from(discussion_class, {}, label: "discussion")
       }.to raise_error(
         Pennycress::ValidationError,
         "discussion must be a Discussion or a primary key value: {}"
@@ -68,7 +68,7 @@ RSpec.describe Pennycress::ModelReference do
 
     it "raises when a scalar model receives an array" do
       expect {
-        described_class.normalize(discussion_class, [1], label: "discussion")
+        described_class.from(discussion_class, [1], label: "discussion")
       }.to raise_error(
         Pennycress::ValidationError,
         "discussion must be a Discussion or a primary key value: [1]"
@@ -93,14 +93,14 @@ RSpec.describe Pennycress::ModelReference do
       end
 
       it "accepts a composite primary key array" do
-        reference = described_class.normalize(order_line_class, [3, 7], label: "order_line")
+        reference = described_class.from(order_line_class, [3, 7], label: "order_line")
 
         expect(reference.id).to eq([3, 7])
       end
 
       it "raises when the composite primary key has the wrong length" do
         expect {
-          described_class.normalize(order_line_class, [3], label: "order_line")
+          described_class.from(order_line_class, [3], label: "order_line")
         }.to raise_error(
           Pennycress::ValidationError,
           "order_line must have 2 primary key values, got 1"
@@ -109,7 +109,7 @@ RSpec.describe Pennycress::ModelReference do
 
       it "raises when a composite model receives a scalar" do
         expect {
-          described_class.normalize(order_line_class, 3, label: "order_line")
+          described_class.from(order_line_class, 3, label: "order_line")
         }.to raise_error(
           Pennycress::ValidationError,
           "order_line must be a OrderLine or an array of 2 key values"
@@ -118,7 +118,7 @@ RSpec.describe Pennycress::ModelReference do
 
       it "raises when a composite primary key value is invalid" do
         expect {
-          described_class.normalize(order_line_class, [3, nil], label: "order_line")
+          described_class.from(order_line_class, [3, nil], label: "order_line")
         }.to raise_error(
           Pennycress::ValidationError,
           "order_line primary keys must use scalar values"

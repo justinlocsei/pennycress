@@ -64,7 +64,7 @@ module Pennycress
       label = key.to_s
 
       if model_ids.include?(key)
-        ModelReference.normalize(type, value, label: label)
+        ModelReference.from(type, value, label: label)
       else
         error = Schema.send(:check_type, type, value, label: label)
 
