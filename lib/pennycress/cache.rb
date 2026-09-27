@@ -33,6 +33,7 @@ module Pennycress
     # Reads a cached value, computing and storing it when absent
     #
     # @param reference [OutputReference]
+    # @yieldparam reference [OutputReference] a reference that was not cached
     # @yieldreturn [Object] the value to cache in the case of a cache miss
     # @return [Object] the cached or computed value
     def fetch(reference, &)
