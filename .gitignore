@@ -1,15 +1,16 @@
 .bundle/
 .gem_rbs_collection/
 .yardoc/
+/coverage/
 /doc/
 /log/
-/tmp/
+
+/bin/*
+!/bin/console
+!/bin/setup
 
 /spec/dummy/log/
 /spec/dummy/public/
 /spec/dummy/storage/
 /spec/dummy/tmp/
-
-/bin/*
-!/bin/console
-!/bin/setup
+/tmp/
