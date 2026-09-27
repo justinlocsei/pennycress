@@ -2,10 +2,38 @@
 
 require "active_support/cache"
 require "pennycress/configuration"
+require "pennycress/value"
 
 module Pennycress
   # Helpers for configuring Pennycress in specs.
   module TestHelpers
+    # Builds a value class that returns its integer ID input unchanged
+    #
+    # @yield [Class] an optional class body for extended configuration
+    # @return [Class] a value class with additional tracking attributes
+    def identity_value_class(&extension)
+      Class.new(Pennycress::Value) do
+        class << self
+          attr_accessor :compute_calls, :computed_values
+        end
+
+        self.compute_calls = 0
+        self.computed_values = []
+
+        input id: Integer
+        output Integer
+
+        define_method(:compute) do |id:|
+          self.class.computed_values << id
+          self.class.compute_calls += 1
+
+          id
+        end
+
+        class_eval(&extension) if extension
+      end
+    end
+
     # Runs a block with an in-memory cache configuration
     #
     # @param namespace [String] the global cache namespace
