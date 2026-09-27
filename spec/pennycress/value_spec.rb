@@ -140,6 +140,65 @@ RSpec.describe Pennycress::Value do
         expect(identity_value.compute_calls).to eq(2)
       end
     end
+
+    context "with a model input" do
+      let(:discussion_class) { Class.new(ActiveRecord::Base) }
+
+      let(:discussion_value) do
+        stub_const("Discussion", discussion_class)
+
+        Class.new(Pennycress::Value) do
+          class << self
+            attr_accessor :compute_calls
+          end
+
+          self.compute_calls = 0
+
+          input :discussion
+          output String
+
+          define_method(:compute) do |discussion:|
+            self.class.compute_calls += 1
+            "title-#{discussion.id}"
+          end
+        end
+      end
+
+      let(:discussion) do
+        discussion_class.allocate.tap do |record|
+          allow(record).to receive_messages(id: 7, new_record?: false)
+        end
+      end
+
+      around do |example|
+        with_memory_cache { example.run }
+      end
+
+      before do
+        allow(discussion_class).to receive(:find).with(7).and_return(discussion)
+      end
+
+      it "loads the model on a cache miss when given a primary key" do
+        expect(discussion_value.fetch(discussion: 7)).to eq("title-7")
+        expect(discussion_value.compute_calls).to eq(1)
+        expect(discussion_class).to have_received(:find).with(7).once
+      end
+
+      it "does not load the model on a cache hit when given a primary key" do
+        discussion_value.fetch(discussion: 7)
+        discussion_value.fetch(discussion: 7)
+
+        expect(discussion_value.compute_calls).to eq(1)
+        expect(discussion_class).to have_received(:find).with(7).once
+      end
+
+      it "shares a cache entry between primary keys and model instances" do
+        discussion_value.fetch(discussion: 7)
+        discussion_value.fetch(discussion: discussion)
+
+        expect(discussion_value.compute_calls).to eq(1)
+      end
+    end
   end
 
   describe ".fetch_many" do
