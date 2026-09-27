@@ -4,6 +4,11 @@
 /doc/
 /tmp/
 
+/spec/dummy/log/
+/spec/dummy/tmp/
+/spec/dummy/storage/
+/spec/dummy/public/
+
 /bin/*
 !/bin/console
 !/bin/setup
