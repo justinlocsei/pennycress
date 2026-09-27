@@ -9,9 +9,16 @@ module Pennycress
     class << self
       # Ensures that a value conforms to a given shape
       #
+      # When a block is given, it is called for each shaped field with the key
+      # and value.  The block may return a normalized value or raise
+      # {ValidationError} for an invalid field.
+      #
       # @param shape [Hash{Symbol => Class}] the shape to validate against
       # @param value [Object] the value to validate
-      # @return [Hash] a value that conforms to the shape
+      # @yieldparam key [Symbol] a shaped field key
+      # @yieldparam item [Object] the field value
+      # @yieldreturn [Object] a normalized field value
+      # @return [Hash] the input value, or normalized values when a block is given
       # @raise [ValidationError] if the value is invalid
       def validate_shape(shape, value)
         unless value.is_a?(Hash)
@@ -22,9 +29,20 @@ module Pennycress
           "missing key: #{key}" unless value.key?(key)
         end
 
+        normalized = {}
+
         errors += value.filter_map do |key, item|
           if shape.key?(key)
-            check_type(shape[key], item, label: key.to_s)
+            if block_given?
+              begin
+                normalized[key] = yield(key, item)
+                nil
+              rescue ValidationError => e
+                e.message
+              end
+            else
+              check_type(shape[key], item, label: key.to_s)
+            end
           else
             "unknown key: #{key}"
           end
@@ -34,7 +52,7 @@ module Pennycress
           raise ValidationError, errors.sort.join("\n")
         end
 
-        value
+        block_given? ? normalized : value
       end
 
       # Ensures that a value is an instance of a type

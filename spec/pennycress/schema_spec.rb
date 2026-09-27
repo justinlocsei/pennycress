@@ -70,6 +70,30 @@ RSpec.describe Pennycress::Schema do
         'value is not a hash: "@string"'
       )
     end
+
+    it "normalizes values with a block" do
+      value = { id: "1", name: "Alice" }
+      shape = { id: Integer, name: String }
+
+      result = described_class.validate_shape(shape, value) do |key, item|
+        key == :id ? Integer(item) : item
+      end
+
+      expect(result).to eq({ id: 1, name: "Alice" })
+    end
+
+    it "collects normalization errors from a block" do
+      value = { id: "@id", name: "Alice" }
+      shape = { id: Integer, name: String }
+
+      expect {
+        described_class.validate_shape(shape, value) do |key, item|
+          raise Pennycress::ValidationError, "#{key} is invalid" if key == :id
+
+          item
+        end
+      }.to raise_error(Pennycress::ValidationError, "id is invalid")
+    end
   end
 
   describe ".validate_type" do
