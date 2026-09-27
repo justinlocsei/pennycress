@@ -468,6 +468,41 @@ RSpec.describe Pennycress::Value do
     end
   end
 
+  describe ".reset_cache" do
+    it "clears memoized cache bindings so the current configuration store is used" do
+      compute_calls = 0
+
+      value_class = Class.new(Pennycress::Value) do
+        input id: Integer
+        output Integer
+
+        define_method(:compute) do |id:|
+          compute_calls += 1
+          id * 2
+        end
+      end
+
+      first_store = ActiveSupport::Cache::MemoryStore.new
+      second_store = ActiveSupport::Cache::MemoryStore.new
+
+      Pennycress::Configuration.override(
+        Pennycress::Configuration.build { |config| config.cache = first_store }
+      ) do
+        value_class.fetch(id: 3)
+        expect(compute_calls).to eq(1)
+      end
+
+      value_class.reset_cache
+
+      Pennycress::Configuration.override(
+        Pennycress::Configuration.build { |config| config.cache = second_store }
+      ) do
+        value_class.fetch(id: 3)
+        expect(compute_calls).to eq(2)
+      end
+    end
+  end
+
   describe ".seeds" do
     it "defines and returns seeds" do
       value = Class.new(Pennycress::Value) do

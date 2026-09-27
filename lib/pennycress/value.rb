@@ -90,6 +90,13 @@ module Pennycress
         config.output = Output.new(schema)
       end
 
+      # Clears memoized cache bindings
+      #
+      # @return [void]
+      def reset_cache
+        @cache = nil
+      end
+
       # Defines or returns the value's seeds
       #
       # @yieldreturn [Enumerable<Object>] a list of seeds to warm
