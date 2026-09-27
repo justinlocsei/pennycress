@@ -7,6 +7,8 @@ require "pennycress/value"
 require "pennycress/value_config"
 
 RSpec.describe Pennycress::Value do
+  let(:identity_value) { identity_value_class }
+
   it "registers subclasses in the current registry" do
     first = Class.new(Pennycress::Value) do
       input id: Integer
@@ -33,57 +35,26 @@ RSpec.describe Pennycress::Value do
   end
 
   describe ".evict_many" do
-    let(:value_class) do
-      Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
-
-        def compute(id:)
-          id * 2
-        end
-      end
-    end
-
     context "with a memory cache" do
       around do |example|
         with_memory_cache { example.run }
       end
 
       it "evicts cached outputs" do
-        compute_calls = 0
+        identity_value.fetch_many([{ id: 3 }, { id: 5 }])
+        identity_value.evict_many([{ id: 3 }, { id: 5 }])
+        identity_value.fetch_many([{ id: 3 }, { id: 5 }])
 
-        value_class.class_eval do
-          define_method(:compute) do |id:|
-            compute_calls += 1
-            id * 2
-          end
-        end
-
-        value_class.fetch_many([{ id: 3 }, { id: 5 }])
-        value_class.evict_many([{ id: 3 }, { id: 5 }])
-        value_class.fetch_many([{ id: 3 }, { id: 5 }])
-
-        expect(compute_calls).to eq(4)
+        expect(identity_value.compute_calls).to eq(4)
       end
 
       it "does nothing for an empty list" do
-        expect { value_class.evict_many([]) }.not_to raise_error
+        expect { identity_value.evict_many([]) }.not_to raise_error
       end
     end
   end
 
   describe ".fetch" do
-    let(:doubled_value) do
-      Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
-
-        def compute(id:)
-          id * 2
-        end
-      end
-    end
-
     it "raises when compute is not implemented" do
       value_class = Class.new(Pennycress::Value) do
         input id: Integer
@@ -94,15 +65,15 @@ RSpec.describe Pennycress::Value do
     end
 
     it "raises when input is invalid" do
-      expect { doubled_value.fetch(id: "100") }.to raise_error(
+      expect { identity_value.fetch(id: "100") }.to raise_error(
         Pennycress::ValidationError,
         /100/
       )
     end
 
     it "returns compute results for valid input" do
-      expect(doubled_value.fetch(id: 3)).to eq(6)
-      expect(doubled_value.fetch(id: 5)).to eq(10)
+      expect(identity_value.fetch(id: 3)).to eq(3)
+      expect(identity_value.fetch(id: 5)).to eq(5)
     end
 
     it "raises when the computed output is invalid" do
@@ -122,34 +93,16 @@ RSpec.describe Pennycress::Value do
     end
 
     it "uses the configuration namespace for anonymous value classes" do
-      value_class = Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
-
-        def compute(id:)
-          id * 2
-        end
-      end
-
-      value_class.fetch(
+      identity_value.fetch(
         id: 3,
         inspect_reference: ->(ref) { expect(ref.cache_key).to eq("pennycress/3") }
       )
     end
 
     it "includes a multi-level constant path in the cache key" do
-      value_class = Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
+      stub_const("Alfa::Bravo", identity_value)
 
-        def compute(id:)
-          id * 2
-        end
-      end
-
-      stub_const("Alfa::Bravo", value_class)
-
-      value_class.fetch(
+      identity_value.fetch(
         id: 3,
         inspect_reference: lambda { |ref|
           expect(ref.cache_key).to eq("pennycress/alfa/bravo/3")
@@ -158,19 +111,10 @@ RSpec.describe Pennycress::Value do
     end
 
     it "uses the global cache namespace in the cache key" do
-      value_class = Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
-
-        def compute(id:)
-          id * 2
-        end
-      end
-
-      stub_const("Alfa", value_class)
+      stub_const("Alfa", identity_value)
 
       with_cache_namespace("pennycress/test") do
-        value_class.fetch(
+        identity_value.fetch(
           id: 3,
           inspect_reference: ->(ref) { expect(ref.cache_key).to eq("pennycress/test/alfa/3") }
         )
@@ -183,78 +127,32 @@ RSpec.describe Pennycress::Value do
       end
 
       it "returns a cached result without recomputing" do
-        compute_calls = 0
-
-        value_class = Class.new(Pennycress::Value) do
-          input id: Integer
-          output Integer
-
-          define_method(:compute) do |id:|
-            compute_calls += 1
-            id * 2
-          end
-        end
-
-        expect(value_class.fetch(id: 3)).to eq(6)
-        expect(value_class.fetch(id: 3)).to eq(6)
-        expect(compute_calls).to eq(1)
+        expect(identity_value.fetch(id: 3)).to eq(3)
+        expect(identity_value.fetch(id: 3)).to eq(3)
+        expect(identity_value.compute_calls).to eq(1)
       end
 
       it "caches each input separately" do
-        compute_calls = 0
+        expect(identity_value.fetch(id: 3)).to eq(3)
+        expect(identity_value.fetch(id: 5)).to eq(5)
+        expect(identity_value.fetch(id: 3)).to eq(3)
 
-        value_class = Class.new(Pennycress::Value) do
-          input id: Integer
-          output Integer
-
-          define_method(:compute) do |id:|
-            compute_calls += 1
-            id * 2
-          end
-        end
-
-        expect(value_class.fetch(id: 3)).to eq(6)
-        expect(value_class.fetch(id: 5)).to eq(10)
-        expect(value_class.fetch(id: 3)).to eq(6)
-
-        expect(compute_calls).to eq(2)
+        expect(identity_value.compute_calls).to eq(2)
       end
     end
   end
 
   describe ".fetch_many" do
-    let(:doubled_value) do
-      Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
-
-        def compute(id:)
-          id * 2
-        end
-      end
-    end
-
     it "computes an output for each input" do
-      expect(doubled_value.fetch_many([{ id: 3 }, { id: 5 }])).to eq([6, 10])
+      expect(identity_value.fetch_many([{ id: 3 }, { id: 5 }])).to eq([3, 5])
     end
 
     it "returns an array" do
-      expect(doubled_value.fetch_many([{ id: 3 }])).to be_a(Array)
+      expect(identity_value.fetch_many([{ id: 3 }])).to be_a(Array)
     end
 
     it "pulls inputs on demand through the pipeline" do
-      computed = []
       pulled = []
-
-      value = Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
-
-        define_method(:compute) do |id:|
-          computed << id
-          id * 2
-        end
-      end
 
       enum = Enumerator.new do |yielder|
         pulled << :first
@@ -264,43 +162,31 @@ RSpec.describe Pennycress::Value do
       end
 
       expect(pulled).to eq([])
-      expect(computed).to eq([])
+      expect(identity_value.computed_values).to eq([])
 
-      expect(value.fetch_many(enum)).to eq([6, 10])
+      expect(identity_value.fetch_many(enum)).to eq([3, 5])
 
       expect(pulled).to eq(%i[first second])
-      expect(computed).to eq([3, 5])
+      expect(identity_value.computed_values).to eq([3, 5])
     end
 
     it "stops at the first invalid input without processing the rest" do
-      computed = []
-
-      value = Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
-
-        define_method(:compute) do |id:|
-          computed << id
-          id * 2
-        end
-      end
-
       enum = Enumerator.new do |yielder|
         yielder << { id: 3 }
         yielder << { id: "5" }
         yielder << { id: 7 }
       end
 
-      expect { value.fetch_many(enum) }.to raise_error(
+      expect { identity_value.fetch_many(enum) }.to raise_error(
         Pennycress::ValidationError,
         /5/
       )
 
-      expect(computed).to be_empty
+      expect(identity_value.computed_values).to be_empty
     end
 
     it "raises when an input is invalid" do
-      expect { doubled_value.fetch_many([{ id: 3 }, { id: "5" }]) }.to raise_error(
+      expect { identity_value.fetch_many([{ id: 3 }, { id: "5" }]) }.to raise_error(
         Pennycress::ValidationError,
         /5/
       )
@@ -365,22 +251,10 @@ RSpec.describe Pennycress::Value do
       end
 
       it "returns cached results without recomputing" do
-        compute_calls = 0
+        expect(identity_value.fetch_many([{ id: 3 }, { id: 5 }])).to eq([3, 5])
+        expect(identity_value.fetch_many([{ id: 3 }, { id: 5 }, { id: 7 }])).to eq([3, 5, 7])
 
-        value_class = Class.new(Pennycress::Value) do
-          input id: Integer
-          output Integer
-
-          define_method(:compute) do |id:|
-            compute_calls += 1
-            id * 2
-          end
-        end
-
-        expect(value_class.fetch_many([{ id: 3 }, { id: 5 }])).to eq([6, 10])
-        expect(value_class.fetch_many([{ id: 3 }, { id: 5 }, { id: 7 }])).to eq([6, 10, 14])
-
-        expect(compute_calls).to eq(3)
+        expect(identity_value.compute_calls).to eq(3)
       end
     end
   end
@@ -420,17 +294,8 @@ RSpec.describe Pennycress::Value do
       end
 
       stub_const("Discussion", discussion)
-      compute_calls = 0
 
-      value_class = Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
-
-        define_method(:compute) do |id:|
-          compute_calls += 1
-          id * 2
-        end
-
+      value_class = identity_value_class do
         watch :discussion do |record|
           [{ id: record.id }]
         end
@@ -441,7 +306,7 @@ RSpec.describe Pennycress::Value do
 
       with_memory_cache do
         value_class.fetch_many([{ id: 1 }, { id: 2 }])
-        expect(compute_calls).to eq(2)
+        expect(value_class.compute_calls).to eq(2)
 
         first = discussion.allocate
         first.id = 1
@@ -452,53 +317,41 @@ RSpec.describe Pennycress::Value do
         value_class.invalidate_model(watch, first)
 
         value_class.fetch(id: 1)
-        expect(compute_calls).to eq(3)
+        expect(value_class.compute_calls).to eq(3)
 
         value_class.fetch(id: 2)
-        expect(compute_calls).to eq(3)
+        expect(value_class.compute_calls).to eq(3)
 
         value_class.invalidate_model(watch, second)
 
         value_class.fetch(id: 1)
-        expect(compute_calls).to eq(3)
+        expect(value_class.compute_calls).to eq(3)
 
         value_class.fetch(id: 2)
-        expect(compute_calls).to eq(4)
+        expect(value_class.compute_calls).to eq(4)
       end
     end
   end
 
   describe ".reset_cache" do
     it "clears memoized cache bindings so the current configuration store is used" do
-      compute_calls = 0
-
-      value_class = Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
-
-        define_method(:compute) do |id:|
-          compute_calls += 1
-          id * 2
-        end
-      end
-
       first_store = ActiveSupport::Cache::MemoryStore.new
       second_store = ActiveSupport::Cache::MemoryStore.new
 
       Pennycress::Configuration.override(
         Pennycress::Configuration.build { |config| config.cache = first_store }
       ) do
-        value_class.fetch(id: 3)
-        expect(compute_calls).to eq(1)
+        identity_value.fetch(id: 3)
+        expect(identity_value.compute_calls).to eq(1)
       end
 
-      value_class.reset_cache
+      identity_value.reset_cache
 
       Pennycress::Configuration.override(
         Pennycress::Configuration.build { |config| config.cache = second_store }
       ) do
-        value_class.fetch(id: 3)
-        expect(compute_calls).to eq(2)
+        identity_value.fetch(id: 3)
+        expect(identity_value.compute_calls).to eq(2)
       end
     end
   end
@@ -583,18 +436,8 @@ RSpec.describe Pennycress::Value do
     end
 
     it "warms each seed" do
-      computed = []
-
-      value = Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
-
+      value = identity_value_class do
         seeds { [1, 2] }
-
-        define_method(:compute) do |id:|
-          computed << id
-          id * 2
-        end
 
         def seed_to_inputs(seed)
           [{ id: seed }, { id: seed + 10 }]
@@ -603,19 +446,13 @@ RSpec.describe Pennycress::Value do
 
       value.warm
 
-      expect(computed).to eq([1, 11, 2, 12])
+      expect(value.computed_values).to eq([1, 11, 2, 12])
+      expect(value.compute_calls).to eq(4)
     end
 
     it "raises when seed_to_inputs is not implemented" do
-      value = Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
-
+      value = identity_value_class do
         seeds { [1] }
-
-        def compute(id:)
-          id
-        end
       end
 
       expect { value.warm }.to raise_error(NotImplementedError)
@@ -649,17 +486,7 @@ RSpec.describe Pennycress::Value do
 
   describe "#warm_seed" do
     it "fetches each input produced by seed_to_inputs" do
-      computed = []
-
-      value = Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
-
-        define_method(:compute) do |id:|
-          computed << id
-          id * 2
-        end
-
+      value = identity_value_class do
         def seed_to_inputs(seed)
           [{ id: seed }, { id: seed + 10 }]
         end
@@ -667,20 +494,12 @@ RSpec.describe Pennycress::Value do
 
       value.new.warm_seed(3)
 
-      expect(computed).to eq([3, 13])
+      expect(value.computed_values).to eq([3, 13])
+      expect(value.compute_calls).to eq(2)
     end
 
     it "raises when seed_to_inputs is not implemented" do
-      value = Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
-
-        def compute(id:)
-          id
-        end
-      end
-
-      expect { value.new.warm_seed(1) }.to raise_error(NotImplementedError)
+      expect { identity_value.new.warm_seed(1) }.to raise_error(NotImplementedError)
     end
   end
 end
