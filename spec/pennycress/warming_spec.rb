@@ -8,7 +8,7 @@ RSpec.describe Pennycress::Warming do
     it "warms each seed for each registered value when async is false" do
       computed = []
 
-      Alfa = Class.new(Pennycress::Value) do
+      alfa = Class.new(Pennycress::Value) do
         input id: Integer
         output Integer
 
@@ -40,7 +40,7 @@ RSpec.describe Pennycress::Warming do
         end
       end
 
-      stub_const("AlfaValue", Alfa)
+      stub_const("AlfaValue", alfa)
       stub_const("BravoValue", bravo)
 
       with_memory_cache do
@@ -51,7 +51,7 @@ RSpec.describe Pennycress::Warming do
     end
 
     it "enqueues a job for each seed when async is true" do
-      Alfa = Class.new(Pennycress::Value) do
+      alfa = Class.new(Pennycress::Value) do
         input id: Integer
         output Integer
 
@@ -65,7 +65,7 @@ RSpec.describe Pennycress::Warming do
         seeds { [2, 3] }
       end
 
-      stub_const("AlfaValue", Alfa)
+      stub_const("AlfaValue", alfa)
       stub_const("BravoValue", bravo)
 
       allow(Pennycress::WarmSeedJob).to receive(:perform_later)
