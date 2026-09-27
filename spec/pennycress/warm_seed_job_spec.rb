@@ -1,21 +1,10 @@
 # frozen_string_literal: true
 
 require "pennycress/warm_seed_job"
-require "pennycress/value"
 
 RSpec.describe Pennycress::WarmSeedJob do
   it "warms a seed for the given value class" do
-    computed = []
-
-    value = Class.new(Pennycress::Value) do
-      input id: Integer
-      output Integer
-
-      define_method(:compute) do |id:|
-        computed << id
-        id * 2
-      end
-
+    value = identity_value_class do
       def seed_to_inputs(seed)
         [{ id: seed }, { id: seed + 10 }]
       end
@@ -27,6 +16,7 @@ RSpec.describe Pennycress::WarmSeedJob do
       described_class.perform_now("WarmSeedJobSpecValue", 3)
     end
 
-    expect(computed).to eq([3, 13])
+    expect(value.computed_values).to eq([3, 13])
+    expect(value.compute_calls).to eq(2)
   end
 end
