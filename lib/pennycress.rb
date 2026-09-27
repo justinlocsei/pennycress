@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "pennycress/configuration"
+require_relative "pennycress/value"
 require_relative "pennycress/version"
 require_relative "pennycress/warming"
 
