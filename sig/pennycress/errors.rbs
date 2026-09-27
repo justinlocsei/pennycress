@@ -1,4 +1,0 @@
-module Pennycress
-  class Error < StandardError
-  end
-end

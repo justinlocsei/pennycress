@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.metadata["rubygems_mfa_required"] = "true"
 
   spec.files = Dir.chdir(__dir__) do
-    Dir.glob("{lib,sig}/**/*").select { |path| File.file?(path) }
+    Dir.glob("lib/**/*").select { |path| File.file?(path) }
   end
 
   spec.files += %w[LICENSE README.md]
