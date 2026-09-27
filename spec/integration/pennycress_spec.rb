@@ -5,7 +5,7 @@ RSpec.describe Pennycress do
     expect(Pennycress::VERSION).to be_a(String)
   end
 
-  it "yields the current configuration" do
+  it "supports configuration" do
     described_class.configure do |config|
       expect(config).to equal(Pennycress::Configuration.current)
     end
