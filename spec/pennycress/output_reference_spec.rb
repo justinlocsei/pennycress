@@ -31,6 +31,32 @@ RSpec.describe Pennycress::OutputReference do
       expect(reference.cache_key).to equal(reference.cache_key)
     end
 
+    it "serializes model references by primary key" do
+      ref = described_class.new(
+        input: {
+          discussion: Pennycress::ModelReference.new(
+            model_class: user_class,
+            id: 9
+          )
+        }
+      )
+
+      expect(ref.cache_key).to eq("9")
+    end
+
+    it "uses composite primary keys from a model reference" do
+      ref = described_class.new(
+        input: {
+          order_line: Pennycress::ModelReference.new(
+            model_class: user_class,
+            id: [3, "XYZ"]
+          )
+        }
+      )
+
+      expect(ref.cache_key).to eq("3/xyz")
+    end
+
     it "serializes input keys in sorted order" do
       user = user_class.allocate
       post = post_class.allocate
@@ -55,6 +81,23 @@ RSpec.describe Pennycress::OutputReference do
       ref = described_class.new(input: { id: 42 }, namespace: "ns")
 
       expect(ref.cache_key).to eq("ns/42")
+    end
+  end
+
+  describe "#compute_input" do
+    it "resolves model references to instances" do
+      ref = described_class.new(
+        input: {
+          discussion: Pennycress::ModelReference.new(
+            model_class: user_class,
+            id: 7,
+            record: user
+          ),
+          id: 42
+        }
+      )
+
+      expect(ref.compute_input).to eq({ discussion: user, id: 42 })
     end
   end
 

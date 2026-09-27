@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "model_reference"
+
 module Pennycress
   # An output reference identifies a cached output for a computed value produced
   # from a single input.
@@ -21,22 +23,31 @@ module Pennycress
       @cache_key ||= [@namespace, *input_key_segments].compact.reject(&:empty?).join("/")
     end
 
+    # @return [Hash] the input in a form suitable for computing an output value
+    def compute_input
+      input.transform_values do |value|
+        value.is_a?(ModelReference) ? value.record : value
+      end
+    end
+
   private
 
     # @return [Array<String>] segments in the cache key for the input
     def input_key_segments
-      input.keys.sort.filter_map do |key|
+      input.keys.sort.flat_map do |key|
         value = input[key]
-        value && value_to_key(value).downcase
+        next [] unless value
+
+        value_to_key(value).map(&:downcase)
       end
     end
 
     # @param value [Object] an input value
-    # @return [String] a serialized key segment
+    # @return [Array<String>] serialized key segments
     def value_to_key(value)
-      value.id.to_s
+      value.is_a?(ModelReference) ? value.cache_key : [value.id.to_s]
     rescue NoMethodError
-      value.to_s
+      [value.to_s]
     end
   end
 end
