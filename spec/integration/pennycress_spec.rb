@@ -1,6 +1,16 @@
 # frozen_string_literal: true
 
-RSpec.describe "Pennycress" do
+RSpec.describe Pennycress do
+  it "exposes a version" do
+    expect(Pennycress::VERSION).to be_a(String)
+  end
+
+  it "yields the current configuration" do
+    described_class.configure do |config|
+      expect(config).to equal(Pennycress::Configuration.current)
+    end
+  end
+
   it "automatically discovers value classes" do
     expect(Pennycress::Registry.current.values.map(&:name)).to include("DiscussionTitle")
   end
