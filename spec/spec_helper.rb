@@ -20,6 +20,13 @@ RSpec.configure do |config|
   end
 
   config.around(:each, type: :unit) do |example|
-    Pennycress::Registry.override(Pennycress::Registry.new) { example.run }
+    registry = Pennycress::Registry.new
+    configuration = Pennycress::Configuration.new
+
+    Pennycress::Registry.override(registry) do
+      Pennycress::Configuration.override(configuration) do
+        example.run
+      end
+    end
   end
 end
