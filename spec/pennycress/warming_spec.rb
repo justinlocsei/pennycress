@@ -1,39 +1,20 @@
 # frozen_string_literal: true
 
-require "pennycress/value"
 require "pennycress/warming"
 
 RSpec.describe Pennycress::Warming do
   describe ".warm_cache" do
     it "warms each seed for each registered value when async is false" do
-      computed = []
-
-      alfa = Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
-
+      alfa = identity_value_class do
         seeds { [1] }
-
-        define_method(:compute) do |id:|
-          computed << id
-          id
-        end
 
         def seed_to_inputs(seed)
           [{ id: seed }]
         end
       end
 
-      bravo = Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
-
+      bravo = identity_value_class do
         seeds { [2, 3] }
-
-        define_method(:compute) do |id:|
-          computed << id
-          id
-        end
 
         def seed_to_inputs(seed)
           [{ id: seed }]
@@ -47,21 +28,15 @@ RSpec.describe Pennycress::Warming do
         described_class.warm_cache(async: false)
       end
 
-      expect(computed).to eq([1, 2, 3])
+      expect(alfa.computed_values + bravo.computed_values).to eq([1, 2, 3])
     end
 
     it "enqueues a job for each seed when async is true" do
-      alfa = Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
-
+      alfa = identity_value_class do
         seeds { [1] }
       end
 
-      bravo = Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
-
+      bravo = identity_value_class do
         seeds { [2, 3] }
       end
 
@@ -78,10 +53,7 @@ RSpec.describe Pennycress::Warming do
     end
 
     it "raises when a value class has no name" do
-      Class.new(Pennycress::Value) do
-        input id: Integer
-        output Integer
-
+      identity_value_class do
         seeds { [1] }
       end
 
