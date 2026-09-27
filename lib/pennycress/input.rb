@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative "model_reference"
 require_relative "models"
 require_relative "schema"
 
@@ -41,7 +42,9 @@ module Pennycress
     # @return [Hash] an input that conforms to the schema
     # @raise [ValidationError] if the input is invalid
     def validate(input)
-      Schema.validate_shape(schema, input)
+      Schema.validate_shape(schema, input) do |key, value|
+        normalize_field(key, value)
+      end
     end
 
   private
@@ -51,6 +54,24 @@ module Pennycress
       @schema ||= model_ids
         .to_h { |id| [id, Pennycress::Models.resolve(id)] }
         .merge(named)
+    end
+
+    # @param key [Symbol]
+    # @param value [Object]
+    # @return [Object]
+    def normalize_field(key, value)
+      type = schema[key]
+      label = key.to_s
+
+      if model_ids.include?(key)
+        ModelReference.normalize(type, value, label: label)
+      else
+        error = Schema.send(:check_type, type, value, label: label)
+
+        raise ValidationError, error if error
+
+        value
+      end
     end
   end
 end

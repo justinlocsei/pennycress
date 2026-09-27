@@ -78,14 +78,63 @@ RSpec.describe Pennycress::Input do
     end
 
     it "returns an input that conforms to the contract" do
+      post = post_class.allocate
+      user = user_class.allocate
+
+      allow(post).to receive_messages(id: 1, new_record?: false)
+      allow(user).to receive_messages(id: 2, new_record?: false)
+
       value = {
         id: 1,
         name: "Alice",
-        post: post_class.allocate,
-        user: user_class.allocate
+        post: post,
+        user: user
       }
 
-      expect(input.validate(value)).to eq(value)
+      validated = input.validate(value)
+
+      expect(validated[:id]).to eq(1)
+      expect(validated[:name]).to eq("Alice")
+      expect(validated[:post]).to have_attributes(model_class: post_class, id: 1)
+      expect(validated[:post].record).to equal(post)
+      expect(validated[:user]).to have_attributes(model_class: user_class, id: 2)
+      expect(validated[:user].record).to equal(user)
+    end
+
+    it "accepts primary key values for model inputs" do
+      value = {
+        id: 1,
+        name: "Alice",
+        post: 3,
+        user: 4
+      }
+
+      validated = input.validate(value)
+
+      expect(validated[:post]).to have_attributes(model_class: post_class, id: 3)
+      expect(validated[:user]).to have_attributes(model_class: user_class, id: 4)
+    end
+
+    it "raises when an unknown key is present" do
+      value = {
+        extra: true,
+        id: 1,
+        name: "Alice",
+        post: 3,
+        user: 4
+      }
+
+      expect { input.validate(value) }.to raise_error(
+        Pennycress::ValidationError,
+        "unknown key: extra"
+      )
+    end
+
+    it "raises when the input is not a hash" do
+      expect { input.validate("@input") }.to raise_error(
+        Pennycress::ValidationError,
+        'value is not a hash: "@input"'
+      )
     end
 
     it "raises when an input is incomplete or invalid" do
@@ -97,7 +146,7 @@ RSpec.describe Pennycress::Input do
 
       expect { input.validate(value) }.to raise_error(
         Pennycress::ValidationError,
-        %(id is not an instance of Integer: "@id"\nmissing key: user)
+        %(id is not an instance of Integer: "@id"\nmissing key: user\npost must be persisted)
       )
     end
   end
