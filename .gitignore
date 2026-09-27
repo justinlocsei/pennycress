@@ -2,6 +2,7 @@
 .gem_rbs_collection/
 .yardoc/
 /doc/
+/log/
 /tmp/
 
 /spec/dummy/log/
