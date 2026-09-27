@@ -6,9 +6,9 @@
 /tmp/
 
 /spec/dummy/log/
-/spec/dummy/tmp/
-/spec/dummy/storage/
 /spec/dummy/public/
+/spec/dummy/storage/
+/spec/dummy/tmp/
 
 /bin/*
 !/bin/console
