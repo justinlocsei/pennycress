@@ -4,3 +4,4 @@ set -euo pipefail
 
 bundle install
 bundle binstubs steep rspec-core rubocop yard
+(cd spec/dummy && RAILS_ENV=test bundle exec rake db:prepare)
