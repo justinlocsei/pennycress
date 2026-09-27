@@ -8,6 +8,12 @@ RSpec.configure do |config|
   config.before(:each, type: :integration) do
     Pennycress::IntegrationTestHelpers.boot_rails
 
+    Pennycress::Configuration.current.cache = Rails.cache
+
+    Pennycress::Registry.current.values.each do |value_class|
+      value_class.remove_instance_variable(:@cache) if value_class.instance_variable_defined?(:@cache)
+    end
+
     ActiveJob::Base.queue_adapter = :test
     Pennycress::WarmSeedJob.queue_adapter = ActiveJob::Base.queue_adapter
     clear_enqueued_jobs
