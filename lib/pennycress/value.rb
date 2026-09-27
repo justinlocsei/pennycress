@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "cache"
+require_relative "caching"
 require_relative "configuration"
 require_relative "constraints"
 require_relative "input"
@@ -152,10 +153,10 @@ module Pennycress
       def reference(input)
         validated = config.input.validate(input)
 
-        namespace = [Configuration.current.cache_namespace, cache_namespace]
-          .compact
-          .reject(&:empty?)
-          .join("/")
+        namespace = Caching.key(
+          Configuration.current.cache_namespace,
+          cache_namespace
+        )
 
         OutputReference.new(
           input: validated,

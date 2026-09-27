@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative "caching"
 require_relative "model_reference"
 
 module Pennycress
@@ -17,10 +18,7 @@ module Pennycress
 
     # @return [String] the cache key for this reference
     def cache_key
-      @cache_key ||= [@namespace, *input_key_segments]
-        .compact
-        .reject(&:empty?)
-        .join("/")
+      @cache_key ||= Caching.key(@namespace, *input_key_segments)
     end
 
     # @return [Hash] the input in a form suitable for computing an output value
