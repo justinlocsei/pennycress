@@ -12,6 +12,16 @@ module Pennycress
     # @yield [Class] an optional class body for extended configuration
     # @return [Class] a value class with additional tracking attributes
     def identity_value_class(&extension)
+      item_class = Class.new(ActiveRecord::Base)
+
+      allow(item_class).to receive(:find) do |id|
+        item_class.allocate.tap do |record|
+          allow(record).to receive_messages(id: id, new_record?: false)
+        end
+      end
+
+      stub_const("Item", item_class)
+
       Class.new(Pennycress::Value) do
         class << self
           attr_accessor :compute_calls, :computed_values
@@ -20,14 +30,14 @@ module Pennycress
         self.compute_calls = 0
         self.computed_values = []
 
-        input id: Integer
+        input :item
         output Integer
 
-        define_method(:compute) do |id:|
-          self.class.computed_values << id
+        define_method(:compute) do |item:|
+          self.class.computed_values << item.id
           self.class.compute_calls += 1
 
-          id
+          item.id
         end
 
         class_eval(&extension) if extension
