@@ -5,21 +5,20 @@ require_relative "models"
 require_relative "schema"
 
 module Pennycress
-  # An input describes a value's inputs models.
+  # An input describes a value's model inputs.
   class Input
     # @return [Array<Symbol>] the IDs of the models used by the value
     attr_reader :model_ids
 
     # Creates an input schema for a value
     #
-    # @param model_ids [Array<Symbol>] model IDs (e.g., `[:uploaded_file, :user]`)
-    def initialize(model_ids: [])
-      @model_ids = model_ids.uniq.sort
-    end
+    # @param model_ids [Array<Symbol>] model IDs (e.g., `:uploaded_file, :user`)
+    # @raise [ArgumentError] if model IDs are missing or invalid
+    def initialize(*model_ids)
+      raise ArgumentError, "model IDs are required" if model_ids.empty?
+      raise ArgumentError, "model IDs must be symbols" unless model_ids.all?(Symbol)
 
-    # @return [Boolean] whether models are absent
-    def empty?
-      model_ids.empty?
+      @model_ids = model_ids.uniq.sort
     end
 
     # Validates an input against the schema

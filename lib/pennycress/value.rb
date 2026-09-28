@@ -73,10 +73,7 @@ module Pennycress
       # @param model_ids [Array<Symbol>] model IDs (e.g., `:uploaded_file, :user`)
       # @return [void]
       def input(*model_ids)
-        raise ArgumentError, "input requires at least one model ID" if model_ids.empty?
-        raise ArgumentError, "input IDs must be symbols" unless model_ids.all?(Symbol)
-
-        config.input = Input.new(model_ids: model_ids)
+        config.input = Input.new(*model_ids)
       end
 
       # Invalidate cached outputs for a watched model

@@ -5,31 +5,31 @@ require "pennycress/errors"
 require "pennycress/input"
 
 RSpec.describe Pennycress::Input do
-  describe "#empty?" do
-    it "is true when there are no models" do
-      expect(Pennycress::Input.new).to be_empty
+  describe ".new" do
+    it "raises when model IDs are missing" do
+      expect { Pennycress::Input.new }.to raise_error(
+        ArgumentError,
+        "model IDs are required"
+      )
     end
 
-    it "is false when models are defined" do
-      input = Pennycress::Input.new(model_ids: [:user])
-
-      expect(input).not_to be_empty
+    it "raises when model IDs are not symbols" do
+      expect { Pennycress::Input.new("user") }.to raise_error(
+        ArgumentError,
+        "model IDs must be symbols"
+      )
     end
   end
 
   describe "#model_ids" do
-    it "is empty by default" do
-      expect(Pennycress::Input.new.model_ids).to eq([])
-    end
-
     it "reflects model IDs passed to the constructor" do
-      input = Pennycress::Input.new(model_ids: %i[user post])
+      input = Pennycress::Input.new(:user, :post)
 
       expect(input.model_ids).to eq(%i[post user])
     end
 
     it "exposes unique model IDs" do
-      input = Pennycress::Input.new(model_ids: %i[user post user])
+      input = Pennycress::Input.new(:user, :post, :user)
 
       expect(input.model_ids).to eq(%i[post user])
     end
@@ -39,11 +39,7 @@ RSpec.describe Pennycress::Input do
     let(:user_class) { Class.new(ActiveRecord::Base) }
     let(:post_class) { Class.new(ActiveRecord::Base) }
 
-    let(:input) do
-      Pennycress::Input.new(
-        model_ids: %i[post user]
-      )
-    end
+    let(:input) { Pennycress::Input.new(:post, :user) }
 
     before do
       stub_const("User", user_class)

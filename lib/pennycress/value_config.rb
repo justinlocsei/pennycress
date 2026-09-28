@@ -24,7 +24,6 @@ module Pennycress
     # @raise [ValidationError] if a schema is incomplete
     def input
       raise ValidationError, "input is not defined" if @input.nil?
-      raise ValidationError, "input is empty" if @input.empty?
 
       @input
     end

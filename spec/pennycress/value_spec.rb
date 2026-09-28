@@ -338,9 +338,9 @@ RSpec.describe Pennycress::Value do
     it "rejects non-symbol input IDs" do
       expect {
         Class.new(Pennycress::Value) do
-          input id: Integer
+          input "user"
         end
-      }.to raise_error(ArgumentError, "input IDs must be symbols")
+      }.to raise_error(ArgumentError, "model IDs must be symbols")
     end
   end
 

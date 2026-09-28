@@ -14,19 +14,8 @@ RSpec.describe Pennycress::ValueConfig do
       )
     end
 
-    it "raises when input is empty" do
-      config.input = Pennycress::Input.new
-
-      expect { config.input }.to raise_error(
-        Pennycress::ValidationError,
-        "input is empty"
-      )
-    end
-
     it "returns configured input" do
-      config.input = Pennycress::Input.new(
-        model_ids: %i[user post]
-      )
+      config.input = Pennycress::Input.new(:user, :post)
 
       expect(config.input.model_ids).to eq(%i[post user])
     end
