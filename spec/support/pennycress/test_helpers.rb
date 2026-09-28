@@ -7,11 +7,10 @@ require "pennycress/value"
 module Pennycress
   # Helpers for configuring Pennycress in specs.
   module TestHelpers
-    # Builds a value class that returns its integer ID input unchanged
+    # Defines a stub Item model whose find returns a persisted record for any ID
     #
-    # @yield [Class] an optional class body for extended configuration
-    # @return [Class] a value class with additional tracking attributes
-    def identity_value_class(&extension)
+    # @return [ActiveRecord::Base] the stub Item model class
+    def stub_item_model
       item_class = Class.new(ActiveRecord::Base)
 
       allow(item_class).to receive(:find) do |id|
@@ -21,6 +20,14 @@ module Pennycress
       end
 
       stub_const("Item", item_class)
+    end
+
+    # Builds a value class that returns its integer ID input unchanged
+    #
+    # @yield [ActiveRecord::Base] an optional class body for extended configuration
+    # @return [ActiveRecord::Base] a value class with additional tracking attributes
+    def identity_value_class(&extension)
+      stub_item_model
 
       Class.new(Pennycress::Value) do
         class << self
