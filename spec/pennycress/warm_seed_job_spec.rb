@@ -6,7 +6,7 @@ RSpec.describe Pennycress::WarmSeedJob do
   it "warms a seed for the given value class" do
     value = identity_value_class do
       def seed_to_inputs(seed)
-        [{ id: seed }, { id: seed + 10 }]
+        [{ item: seed }, { item: seed + 10 }]
       end
     end
 

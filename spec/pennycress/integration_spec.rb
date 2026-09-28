@@ -18,14 +18,14 @@ RSpec.describe Pennycress::Integration do
 
       value = identity_value_class do
         watch :discussion do |record|
-          [{ id: record.id }]
+          [{ item: record.id }]
         end
       end
 
       with_memory_cache do
         described_class.watch_models
 
-        value.fetch(id: 1)
+        value.fetch(item: 1)
         expect(value.compute_calls).to eq(1)
 
         record = discussion.allocate
@@ -33,7 +33,7 @@ RSpec.describe Pennycress::Integration do
 
         described_class.handle_commit(record)
 
-        value.fetch(id: 1)
+        value.fetch(item: 1)
         expect(value.compute_calls).to eq(2)
       end
     end
@@ -51,14 +51,14 @@ RSpec.describe Pennycress::Integration do
 
       value = identity_value_class do
         watch :discussion do |record|
-          [{ id: record.id }]
+          [{ item: record.id }]
         end
       end
 
       with_memory_cache do
         described_class.watch_models
 
-        value.fetch(id: 1)
+        value.fetch(item: 1)
         expect(value.compute_calls).to eq(1)
 
         record = discussion.allocate
@@ -66,7 +66,7 @@ RSpec.describe Pennycress::Integration do
 
         described_class.handle_commit(record)
 
-        value.fetch(id: 1)
+        value.fetch(item: 1)
         expect(value.compute_calls).to eq(2)
       end
     end
@@ -96,7 +96,7 @@ RSpec.describe Pennycress::Integration do
             File.join(directory, "#{class_name.underscore}.rb"),
             <<~RUBY
               class #{class_name} < Pennycress::Value
-                input id: Integer
+                input :item
                 output Integer
               end
             RUBY
@@ -130,11 +130,11 @@ RSpec.describe Pennycress::Integration do
       stub_const("Discussion", discussion)
 
       Class.new(Pennycress::Value) do
-        input id: Integer
+        input :item
         output Integer
 
         watch :discussion do |record|
-          [{ id: record.id }]
+          [{ item: record.id }]
         end
       end
 

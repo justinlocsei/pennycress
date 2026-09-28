@@ -9,7 +9,7 @@ RSpec.describe Pennycress::Warming do
         seeds { [1] }
 
         def seed_to_inputs(seed)
-          [{ id: seed }]
+          [{ item: seed }]
         end
       end
 
@@ -17,7 +17,7 @@ RSpec.describe Pennycress::Warming do
         seeds { [2, 3] }
 
         def seed_to_inputs(seed)
-          [{ id: seed }]
+          [{ item: seed }]
         end
       end
 
