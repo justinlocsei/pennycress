@@ -25,12 +25,10 @@ RSpec.describe Pennycress::ValueConfig do
 
     it "returns configured input" do
       config.input = Pennycress::Input.new(
-        model_ids: %i[user post],
-        named: { id: Integer, name: String }
+        model_ids: %i[user post]
       )
 
       expect(config.input.model_ids).to eq(%i[post user])
-      expect(config.input.named).to eq({ id: Integer, name: String })
     end
   end
 
