@@ -1,0 +1,34 @@
+name: Verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  rubocop:
+    name: RuboCop
+    uses: ./.github/workflows/bundle-exec.yml
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby-version: ["3.3", "4.0"]
+    with:
+      command: rubocop
+      label: Lint
+      ruby-version: ${{ matrix.ruby-version }}
+
+  rspec:
+    name: RSpec
+    uses: ./.github/workflows/bundle-exec.yml
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby-version: ["3.3", "4.0"]
+    with:
+      command: rspec
+      label: Test
+      ruby-version: ${{ matrix.ruby-version }}

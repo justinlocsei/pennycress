@@ -1,0 +1,38 @@
+name: Run a bundle exec command
+
+on:
+  workflow_call:
+    inputs:
+      command:
+        description: The command to run
+        required: true
+        type: string
+      label:
+        description: A label for the job
+        required: true
+        type: string
+      ruby-version:
+        description: The Ruby version to use
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    name: Run
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Clone Pennycress
+        uses: actions/checkout@v4
+
+      - name: Install Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ inputs.ruby-version }}
+          bundler-cache: true
+
+      - name: ${{ inputs.label }}
+        run: bundle exec ${{ inputs.command }}
