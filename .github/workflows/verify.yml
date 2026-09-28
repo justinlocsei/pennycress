@@ -12,14 +12,10 @@ jobs:
   rubocop:
     name: RuboCop
     uses: ./.github/workflows/bundle-exec.yml
-    strategy:
-      fail-fast: false
-      matrix:
-        ruby-version: ["3.3", "4.0"]
     with:
       command: rubocop
       label: Lint
-      ruby-version: ${{ matrix.ruby-version }}
+      ruby-version: "3.3"
 
   rspec:
     name: RSpec
