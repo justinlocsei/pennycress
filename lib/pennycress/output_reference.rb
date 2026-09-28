@@ -36,16 +36,8 @@ module Pennycress
         value = @raw_input[key]
         next [] unless value
 
-        value_to_key(value).map(&:downcase)
+        value.cache_key.map(&:downcase)
       end
-    end
-
-    # @param value [Object] an input value
-    # @return [Array<String>] serialized key segments
-    def value_to_key(value)
-      value.is_a?(ModelReference) ? value.cache_key : [value.id.to_s]
-    rescue NoMethodError
-      [value.to_s]
     end
   end
 end
