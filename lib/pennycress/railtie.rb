@@ -17,17 +17,17 @@ module Pennycress
       Integration.watch_models
     end
 
-    initializer "pennycress.expand_directories", after: :load_config_initializers do
-      config = Configuration.current
-
-      config.directories = Configuration.expand_paths(
-        Rails.root,
-        config.directories.empty? ? DEFAULT_DIRECTORIES : config.directories
-      )
-    end
-
     initializer "pennycress.setup", before: :load_config_initializers do
       Configuration.current.cache = Rails.cache
+    end
+
+    initializer "pennycress.expand_directories", after: :load_config_initializers do
+      configuration = Configuration.current
+
+      configuration.directories = Configuration.expand_paths(
+        Rails.root,
+        configuration.directories.empty? ? DEFAULT_DIRECTORIES : configuration.directories
+      )
     end
 
     rake_tasks do
