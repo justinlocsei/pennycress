@@ -15,6 +15,11 @@ on:
         description: The Ruby version to use
         required: true
         type: string
+      setup:
+        description: Run bin/setup before the command
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -33,6 +38,10 @@ jobs:
         with:
           ruby-version: ${{ inputs.ruby-version }}
           bundler-cache: true
+
+      - name: Set up Pennycress
+        if: inputs.setup
+        run: bin/setup
 
       - name: ${{ inputs.label }}
         run: bundle exec ${{ inputs.command }}

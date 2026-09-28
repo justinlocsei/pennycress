@@ -32,3 +32,4 @@ jobs:
       command: rspec
       label: Test
       ruby-version: ${{ matrix.ruby-version }}
+      setup: true
