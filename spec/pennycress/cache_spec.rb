@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "active_support/cache"
+require "active_record"
 require "pennycress/cache"
 require "pennycress/output_reference"
 
@@ -8,8 +9,23 @@ RSpec.describe Pennycress::Cache do
   let(:store) { ActiveSupport::Cache::MemoryStore.new }
   let(:cache) { described_class.new(store) }
 
-  let(:ref) { Pennycress::OutputReference.new(input: { id: 1 }) }
-  let(:other_ref) { Pennycress::OutputReference.new(input: { id: 2 }) }
+  let(:ref) do
+    Pennycress::OutputReference.new(
+      input: {
+        item: Pennycress::ModelReference.new(model_class: item_class, id: 1)
+      }
+    )
+  end
+
+  let(:other_ref) do
+    Pennycress::OutputReference.new(
+      input: {
+        item: Pennycress::ModelReference.new(model_class: item_class, id: 2)
+      }
+    )
+  end
+
+  let(:item_class) { Class.new(ActiveRecord::Base) }
 
   describe "#evict" do
     it "evicts a cached value" do
@@ -53,7 +69,7 @@ RSpec.describe Pennycress::Cache do
   describe "#fetch_multi" do
     it "returns values in reference order" do
       results = cache.fetch_multi([other_ref, ref]) do |reference|
-        reference.input[:id]
+        reference.cache_key.to_i
       end
 
       expect(results).to eq([2, 1])
@@ -65,7 +81,7 @@ RSpec.describe Pennycress::Cache do
 
       results = cache.fetch_multi([ref, other_ref]) do |reference|
         computed << reference
-        reference.input[:id]
+        reference.cache_key.to_i
       end
 
       expect(results).to eq(["alfa", 2])

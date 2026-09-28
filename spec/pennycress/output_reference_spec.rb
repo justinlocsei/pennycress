@@ -5,7 +5,20 @@ require "pennycress/output_reference"
 
 RSpec.describe Pennycress::OutputReference do
   let(:reference) do
-    described_class.new(input: { id: 42, user: user })
+    described_class.new(
+      input: {
+        account: Pennycress::ModelReference.new(
+          model_class: post_class,
+          id: 42,
+          record: post
+        ),
+        user: Pennycress::ModelReference.new(
+          model_class: user_class,
+          id: 7,
+          record: user
+        )
+      }
+    )
   end
 
   let(:post_class) { Class.new(ActiveRecord::Base) }
@@ -14,6 +27,12 @@ RSpec.describe Pennycress::OutputReference do
   let(:user) do
     user_class.allocate.tap do |record|
       allow(record).to receive(:id).and_return(7)
+    end
+  end
+
+  let(:post) do
+    post_class.allocate.tap do |record|
+      allow(record).to receive(:id).and_return(42)
     end
   end
 
@@ -58,27 +77,22 @@ RSpec.describe Pennycress::OutputReference do
     end
 
     it "serializes input keys in sorted order" do
-      user = user_class.allocate
-      post = post_class.allocate
-
-      allow(user).to receive(:id).and_return(7)
-      allow(post).to receive(:id).and_return(42)
-
       ref = described_class.new(
-        input: { id: 1, name: "Alice", post: post, user: user }
+        input: {
+          account: Pennycress::ModelReference.new(model_class: post_class, id: 1),
+          post: Pennycress::ModelReference.new(model_class: post_class, id: 42),
+          user: Pennycress::ModelReference.new(model_class: user_class, id: 7)
+        }
       )
 
-      expect(ref.cache_key).to eq("1/alice/42/7")
-    end
-
-    it "omits nil values" do
-      ref = described_class.new(input: { id: 42, label: nil })
-
-      expect(ref.cache_key).to eq("42")
+      expect(ref.cache_key).to eq("1/42/7")
     end
 
     it "includes a namespace when provided" do
-      ref = described_class.new(input: { id: 42 }, namespace: "ns")
+      ref = described_class.new(
+        input: { account: Pennycress::ModelReference.new(model_class: post_class, id: 42) },
+        namespace: "ns"
+      )
 
       expect(ref.cache_key).to eq("ns/42")
     end
@@ -86,7 +100,7 @@ RSpec.describe Pennycress::OutputReference do
 
   describe "#input" do
     it "returns values suitable for compute" do
-      expect(reference.input).to eq({ id: 42, user: user })
+      expect(reference.input).to eq({ account: post, user: user })
     end
 
     it "resolves model references to instances" do
@@ -96,12 +110,11 @@ RSpec.describe Pennycress::OutputReference do
             model_class: user_class,
             id: 7,
             record: user
-          ),
-          id: 42
+          )
         }
       )
 
-      expect(ref.input).to eq({ discussion: user, id: 42 })
+      expect(ref.input).to eq({ discussion: user })
     end
   end
 end
