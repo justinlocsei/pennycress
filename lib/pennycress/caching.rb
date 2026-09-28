@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 module Pennycress
-  # Helpers for building cache keys.
+  # This module defines helpers for building cache keys.
   module Caching
-    # Builds a cache key from key segments
+    # Builds a cache key from segments
     #
-    # @param segments [Array<Object>] key segments
+    # @param segments [Array<Object>]
     # @return [String]
     def self.key(*segments)
       segments

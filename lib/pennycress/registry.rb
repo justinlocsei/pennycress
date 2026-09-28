@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Pennycress
-  # Tracks value classes registered at load time.
+  # A registry tracks value classes registered at load time.
   class Registry
     class << self
       # @return [Registry] the current registry

@@ -5,7 +5,7 @@ require "active_job"
 require_relative "configuration"
 
 module Pennycress
-  # Warms cached outputs for one value seed.
+  # This job warms cached outputs for one value seed.
   class WarmSeedJob < ActiveJob::Base
     queue_as { Configuration.current.warming_queue }
 

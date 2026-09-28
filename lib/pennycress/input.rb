@@ -11,7 +11,7 @@ module Pennycress
     # @return [Array<Symbol>] the IDs of the models used by the value
     attr_reader :model_ids
 
-    # @return [Hash{Symbol => Class}] a mapping of source IDs to Ruby value classes
+    # @return [Hash{Symbol => Class}] a mapping of IDs to Ruby value classes
     attr_reader :named
 
     # Creates an input schema for a value
@@ -49,7 +49,7 @@ module Pennycress
 
   private
 
-    # @return [Hash{Symbol => Class}] a mapping of source IDs to Ruby value classes
+    # @return [Hash{Symbol => Class}] a mapping of IDs to Ruby value classes
     def schema
       @schema ||= model_ids
         .to_h { |id| [id, Pennycress::Models.resolve(id)] }
@@ -66,11 +66,7 @@ module Pennycress
       if model_ids.include?(key)
         ModelReference.from(type, value, label: label)
       else
-        error = Schema.send(:check_type, type, value, label: label)
-
-        raise ValidationError, error if error
-
-        value
+        Schema.validate_type(type, value, label: label)
       end
     end
   end

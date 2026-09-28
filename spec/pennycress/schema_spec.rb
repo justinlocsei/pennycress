@@ -107,5 +107,12 @@ RSpec.describe Pennycress::Schema do
         'value is not an instance of Integer: "1"'
       )
     end
+
+    it "uses a custom label in error messages" do
+      expect { described_class.validate_type(Integer, "1", label: "id") }.to raise_error(
+        Pennycress::ValidationError,
+        'id is not an instance of Integer: "1"'
+      )
+    end
   end
 end

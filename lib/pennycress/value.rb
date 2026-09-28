@@ -37,7 +37,11 @@ module Pennycress
       # @return [void]
       # @raise [ValidationError] if any inputs are invalid
       def evict_many(inputs)
-        cache.evict_many(inputs.map { |input| reference(input) }.to_a)
+        evict = inputs
+          .map { |input| reference(input) }
+          .to_a
+
+        cache.evict_many(evict)
       end
 
       # Computes an output value for the given input

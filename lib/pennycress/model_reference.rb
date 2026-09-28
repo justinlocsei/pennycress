@@ -13,6 +13,7 @@ module Pennycress
     attr_reader :model_class
 
     class << self
+      # @param model_class [ActiveRecord::Base] a model class
       # @param value [Object] a model instance or primary key value
       # @param label [String] the input label used in error messages
       # @return [ModelReference]

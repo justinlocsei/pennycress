@@ -59,10 +59,11 @@ module Pennycress
       #
       # @param type [Class] the type to validate against
       # @param value [Object] the value to validate
+      # @param label [String] a custom label for the value
       # @return [Object] an instance of the type
       # @raise [ValidationError] if the value is invalid
-      def validate_type(type, value)
-        error = check_type(type, value, label: "value")
+      def validate_type(type, value, label: "value")
+        error = check_type(type, value, label: label)
 
         raise ValidationError, error if error
 

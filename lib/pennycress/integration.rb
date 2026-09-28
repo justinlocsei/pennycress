@@ -4,15 +4,17 @@ require "active_support/concern"
 require_relative "registry"
 
 module Pennycress
-  # Integrates Pennycress with a Rails application.
+  # This module integrates Pennycress with a Rails application.
   module Integration
-    # A concern included on watched models that adds a post-commit hook to
-    # trigger invalidation.
+    # This module is a concern included on watched models that adds a
+    # post-commit hook to trigger invalidation.
     module ModelCommitHandler
       extend ActiveSupport::Concern
 
       included do
-        after_commit { Integration.handle_commit(self) }
+        after_commit do
+          Integration.handle_commit(self)
+        end
       end
     end
 
@@ -29,7 +31,7 @@ module Pennycress
         end
       end
 
-      # Search for value files from the given directories
+      # Search for value files in the given directories
       #
       # The directories should contain Value definitions.  When loaded, these
       # definitions will be added to the value registry.
