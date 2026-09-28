@@ -5,27 +5,13 @@ require "pennycress/errors"
 require "pennycress/input"
 
 RSpec.describe Pennycress::Input do
-  describe ".new" do
-    it "raises when a named field reuses a model ID" do
-      expect do
-        Pennycress::Input.new(model_ids: [:channel], named: { channel: String })
-      end.to raise_error(ArgumentError, "named fields cannot reuse model IDs: :channel")
-    end
-  end
-
   describe "#empty?" do
-    it "is true when there are no models or named fields" do
+    it "is true when there are no models" do
       expect(Pennycress::Input.new).to be_empty
     end
 
     it "is false when models are defined" do
       input = Pennycress::Input.new(model_ids: [:user])
-
-      expect(input).not_to be_empty
-    end
-
-    it "is false when named fields are defined" do
-      input = Pennycress::Input.new(named: { id: Integer })
 
       expect(input).not_to be_empty
     end
@@ -49,26 +35,13 @@ RSpec.describe Pennycress::Input do
     end
   end
 
-  describe "#named" do
-    it "is empty by default" do
-      expect(Pennycress::Input.new.named).to eq({})
-    end
-
-    it "reflects named fields passed to the constructor" do
-      input = Pennycress::Input.new(named: { id: Integer, name: String })
-
-      expect(input.named).to eq({ id: Integer, name: String })
-    end
-  end
-
   describe "#validate" do
     let(:user_class) { Class.new(ActiveRecord::Base) }
     let(:post_class) { Class.new(ActiveRecord::Base) }
 
     let(:input) do
       Pennycress::Input.new(
-        model_ids: %i[post user],
-        named: { id: Integer, name: String }
+        model_ids: %i[post user]
       )
     end
 
@@ -85,16 +58,12 @@ RSpec.describe Pennycress::Input do
       allow(user).to receive_messages(id: 2, new_record?: false)
 
       value = {
-        id: 1,
-        name: "Alice",
         post: post,
         user: user
       }
 
       validated = input.validate(value)
 
-      expect(validated[:id]).to eq(1)
-      expect(validated[:name]).to eq("Alice")
       expect(validated[:post]).to have_attributes(model_class: post_class, id: 1)
       expect(validated[:post].record).to equal(post)
       expect(validated[:user]).to have_attributes(model_class: user_class, id: 2)
@@ -103,8 +72,6 @@ RSpec.describe Pennycress::Input do
 
     it "accepts primary key values for model inputs" do
       value = {
-        id: 1,
-        name: "Alice",
         post: 3,
         user: 4
       }
@@ -118,8 +85,6 @@ RSpec.describe Pennycress::Input do
     it "raises when an unknown key is present" do
       value = {
         extra: true,
-        id: 1,
-        name: "Alice",
         post: 3,
         user: 4
       }
@@ -138,15 +103,9 @@ RSpec.describe Pennycress::Input do
     end
 
     it "raises when an input is incomplete or invalid" do
-      value = {
-        id: "@id",
-        name: "Alice",
-        post: post_class.allocate
-      }
-
-      expect { input.validate(value) }.to raise_error(
+      expect { input.validate(post: post_class.allocate) }.to raise_error(
         Pennycress::ValidationError,
-        %(id is not an instance of Integer: "@id"\nmissing key: user\npost must be persisted)
+        "missing key: user\npost must be persisted"
       )
     end
   end

@@ -5,35 +5,21 @@ require_relative "models"
 require_relative "schema"
 
 module Pennycress
-  # An input describes a value's input schema.  It tracks both models and
-  # optional named fields that allow a value to take arbitrary Ruby classes.
+  # An input describes a value's inputs models.
   class Input
     # @return [Array<Symbol>] the IDs of the models used by the value
     attr_reader :model_ids
 
-    # @return [Hash{Symbol => Class}] a mapping of IDs to Ruby value classes
-    attr_reader :named
-
     # Creates an input schema for a value
     #
     # @param model_ids [Array<Symbol>] model IDs (e.g., `[:uploaded_file, :user]`)
-    # @param named [Hash{Symbol => Class}] named fields (e.g., `{ id: Integer }`)
-    # @raise [ArgumentError] if model IDs and named fields conflict
-    def initialize(model_ids: [], named: {})
+    def initialize(model_ids: [])
       @model_ids = model_ids.uniq.sort
-      conflicts = @model_ids & named.keys
-
-      unless conflicts.empty?
-        keys = conflicts.map { |key| ":#{key}" }.join(", ")
-        raise ArgumentError, "named fields cannot reuse model IDs: #{keys}"
-      end
-
-      @named = named
     end
 
-    # @return [Boolean] whether models and types are absent
+    # @return [Boolean] whether models are absent
     def empty?
-      model_ids.empty? && named.empty?
+      model_ids.empty?
     end
 
     # Validates an input against the schema
@@ -43,30 +29,16 @@ module Pennycress
     # @raise [ValidationError] if the input is invalid
     def validate(input)
       Schema.validate_shape(schema, input) do |key, value|
-        normalize_field(key, value)
+        ModelReference.from(schema[key], value, label: key.to_s)
       end
     end
 
   private
 
-    # @return [Hash{Symbol => Class}] a mapping of IDs to Ruby value classes
+    # @return [Hash{Symbol => Class}] a mapping of IDs to model classes
     def schema
-      @schema ||= model_ids
-        .to_h { |id| [id, Pennycress::Models.resolve(id)] }
-        .merge(named)
-    end
-
-    # @param key [Symbol]
-    # @param value [Object]
-    # @return [Object]
-    def normalize_field(key, value)
-      type = schema[key]
-      label = key.to_s
-
-      if model_ids.include?(key)
-        ModelReference.from(type, value, label: label)
-      else
-        Schema.validate_type(type, value, label: label)
+      @schema ||= model_ids.to_h do |id|
+        [id, Pennycress::Models.resolve(id)]
       end
     end
   end
