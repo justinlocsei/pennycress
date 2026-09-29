@@ -13,6 +13,8 @@ module Pennycress
     def stub_item_model
       item_class = Class.new(ActiveRecord::Base)
 
+      allow(item_class).to receive(:composite_primary_key?).and_return(false)
+
       allow(item_class).to receive(:find) do |id|
         item_class.allocate.tap do |record|
           allow(record).to receive_messages(id: id, new_record?: false)
