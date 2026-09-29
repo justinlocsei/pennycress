@@ -70,6 +70,59 @@ RSpec.describe Pennycress::Integration do
         expect(value.compute_calls).to eq(2)
       end
     end
+
+    it "runs separate watches on the same model for different commit actions" do
+      create_watch_runs = []
+      destroy_watch_runs = []
+
+      value = identity_value_class do
+        watch :item, on: [:create] do |item|
+          create_watch_runs << item
+          [{ item: item.id }]
+        end
+
+        watch :item, on: [:destroy] do |item|
+          destroy_watch_runs << item
+          [{ item: item.id }]
+        end
+      end
+
+      with_memory_cache do
+        described_class.watch_models
+
+        value.fetch(item: 3)
+        value.fetch(item: 5)
+        expect(value.compute_calls).to eq(2)
+
+        created = Item.allocate
+        allow(created).to receive_messages(id: 3, destroyed?: false, previously_new_record?: true)
+
+        described_class.handle_commit(created)
+
+        expect(create_watch_runs).to eq([created])
+        expect(destroy_watch_runs).to be_empty
+
+        value.fetch(item: 3)
+        expect(value.compute_calls).to eq(3)
+        value.fetch(item: 5)
+        expect(value.compute_calls).to eq(3)
+
+        create_watch_runs.clear
+
+        destroyed = Item.allocate
+        allow(destroyed).to receive_messages(id: 5, destroyed?: true, previously_new_record?: false)
+
+        described_class.handle_commit(destroyed)
+
+        expect(create_watch_runs).to be_empty
+        expect(destroy_watch_runs).to eq([destroyed])
+
+        value.fetch(item: 3)
+        expect(value.compute_calls).to eq(3)
+        value.fetch(item: 5)
+        expect(value.compute_calls).to eq(4)
+      end
+    end
   end
 
   describe ".load_values" do
