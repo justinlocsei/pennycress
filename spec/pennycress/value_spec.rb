@@ -288,6 +288,26 @@ RSpec.describe Pennycress::Value do
       expect(value.fetch_many([{ item: 3 }, { item: 5 }])).to eq([12, 20])
     end
 
+    it "raises when a custom compute_many returns the wrong number of outputs" do
+      value = Class.new(Pennycress::Value) do
+        input :item
+        output Integer
+
+        def compute(item:)
+          item.id
+        end
+
+        def compute_many(_inputs)
+          [1]
+        end
+      end
+
+      expect { value.fetch_many([{ item: 3 }, { item: 5 }]) }.to raise_error(
+        Pennycress::ValidationError,
+        "compute_many must return one output per input: got 1, expected 2"
+      )
+    end
+
     it "raises when a custom compute_many returns an invalid output" do
       value = Class.new(Pennycress::Value) do
         input :item

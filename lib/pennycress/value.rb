@@ -232,7 +232,15 @@ module Pennycress
 
       return values if misses.empty?
 
-      computed = compute_many(misses.map(&:input)).map do |result|
+      inputs = misses.map(&:input)
+      results = compute_many(inputs).to_a
+
+      if results.length != inputs.length
+        raise ValidationError,
+              "compute_many must return one output per input: got #{results.length}, expected #{inputs.length}"
+      end
+
+      computed = results.map do |result|
         output.validate(result)
       end
 
