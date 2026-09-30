@@ -1,0 +1,33 @@
+name: Verify Publishing
+
+run-name: Verify Pennycress v${{ inputs.version }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: A published Pennycress version
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify / Ruby ${{ matrix.ruby-version }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby-version: ["3.3", "4.0"]
+    steps:
+      - name: Install Ruby
+        uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1
+        with:
+          ruby-version: ${{ matrix.ruby-version }}
+
+      - name: Verify pennycress@${{ inputs.version }}
+        run: |
+          gem install pennycress -v "${{ inputs.version }}" --no-document
+          ruby -e "require 'pennycress'; exit(Pennycress::VERSION == '${{ inputs.version }}' ? 0 : 1)"
