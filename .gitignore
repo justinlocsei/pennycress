@@ -4,6 +4,7 @@
 /coverage/
 /doc/
 /log/
+/pkg/
 
 /bin/*
 !/bin/console
