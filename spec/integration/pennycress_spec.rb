@@ -6,7 +6,7 @@ RSpec.describe "Pennycress", type: :integration do
   end
 
   it "supports configuration" do
-    described_class.configure do |config|
+    Pennycress.configure do |config|
       expect(config).to equal(Pennycress::Configuration.current)
     end
   end
