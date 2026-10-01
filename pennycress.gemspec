@@ -2,13 +2,15 @@
 
 require_relative "lib/pennycress/version"
 
+summary = "Pennycress allows Rails apps to precompute and cache expensive logic, with fine-grained invalidation and support for targeted cache warming."
+
 Gem::Specification.new do |spec|
   spec.name = "pennycress"
   spec.version = Pennycress::VERSION
   spec.authors = ["Justin Locsei"]
 
-  spec.summary = "Memoized domain values for Rails"
-  spec.description = "Pennycress allows Rails apps to precompute and cache expensive logic, with fine-grained invalidation and support for targeted cache warming."
+  spec.summary = summary
+  spec.description = summary
   spec.homepage = "https://github.com/justinlocsei/pennycress"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.3.0"
