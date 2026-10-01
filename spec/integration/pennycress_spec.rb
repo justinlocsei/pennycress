@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Pennycress do
+RSpec.describe Pennycress, type: :integration do
   it "exposes a version" do
     expect(Pennycress::VERSION).to be_a(String)
   end
