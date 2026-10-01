@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.3] (2026-10-01)
+
+### Fixes
+
+- Require a higher-level file ([#4])
+
 ## [0.0.2] (2026-10-01)
 
 ### Features
@@ -16,9 +22,11 @@ All notable changes to this project will be documented in this file.
 
 <!-- Versions -->
 
+[0.0.3]: https://github.com/justinlocsei/pennycress/compare/v0.0.2..v0.0.3
 [0.0.2]: https://github.com/justinlocsei/pennycress/compare/v0.0.1..v0.0.2
 [0.0.1]: https://github.com/justinlocsei/pennycress/releases/tag/v0.0.1
 
 <!-- PRs -->
 
 [#2]: https://github.com/justinlocsei/pennycress/pull/2
+[#4]: https://github.com/justinlocsei/pennycress/pull/4
