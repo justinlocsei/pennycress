@@ -12,7 +12,13 @@ Gem::Specification.new do |spec|
   spec.homepage = "https://github.com/justinlocsei/pennycress"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.3.0"
-  spec.metadata["rubygems_mfa_required"] = "true"
+
+  spec.metadata = {
+    "bug_tracker_uri" => "https://github.com/justinlocsei/pennycress/issues",
+    "changelog_uri" => "https://github.com/justinlocsei/pennycress/blob/main/CHANGELOG.md",
+    "rubygems_mfa_required" => "true",
+    "source_code_uri" => "https://github.com/justinlocsei/pennycress"
+  }
 
   spec.files = Dir.chdir(__dir__) do
     Dir.glob("lib/**/*").select { |path| File.file?(path) }
