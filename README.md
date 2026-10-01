@@ -48,6 +48,8 @@ Then install it:
 bundle install
 ```
 
+Pennycress requires Ruby >= 3.3 and Rails >= 8.1.
+
 ## Quick Start
 
 Create the following file at `app/values/account_order_total.rb`:
