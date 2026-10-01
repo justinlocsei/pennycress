@@ -9,6 +9,7 @@ Gem::Specification.new do |spec|
 
   spec.summary = "Memoized domain values for Rails"
   spec.description = "Pennycress allows Rails apps to precompute and cache expensive logic, with fine-grained invalidation and support for targeted cache warming."
+  spec.homepage = "https://github.com/justinlocsei/pennycress"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.3.0"
   spec.metadata["rubygems_mfa_required"] = "true"
