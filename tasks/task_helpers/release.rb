@@ -166,7 +166,7 @@ module Pennycress
           raise "No versions were found in the changelog" unless versions_at
 
           date = Time.now.utc.strftime("%Y-%m-%d")
-          entries = commits.map { |commit| "- #{commit.title} ([#{commit.number}])" }
+          entries = commits.map { |commit| "- #{commit.title} ([##{commit.number}])" }
 
           [
             *lines[0...versions_at],
