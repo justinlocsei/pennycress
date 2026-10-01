@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "active_support/cache/null_store"
+require "active_support/cache"
 
 module Pennycress
   # The configuration stores all global settings for Pennycress.
