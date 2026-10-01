@@ -11,10 +11,6 @@ RSpec.configure do |config|
   config.disable_monkey_patching!
   config.include Pennycress::TestHelpers
 
-  config.define_derived_metadata(file_path: %r{/spec/integration/}) do |metadata|
-    metadata[:type] = :integration
-  end
-
   config.define_derived_metadata(file_path: %r{/spec/pennycress/}) do |metadata|
     metadata[:type] = :unit
   end
