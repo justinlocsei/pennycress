@@ -332,4 +332,4 @@ end
 
 ## Why the Name?
 
-In [floristry](https://www.instagram.com/justinlocsei/), pennycress is a filler flower with lots of tiny leaves.  Fine, granular foliage feels appropriate for a library that offers fine-grained cache invalidation.
+In [floristry](https://portflor.io), pennycress is a filler flower with lots of tiny leaves.  Fine, granular foliage feels appropriate for a library that offers fine-grained cache invalidation.
